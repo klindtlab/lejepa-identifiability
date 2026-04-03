@@ -3,7 +3,7 @@
 Code and formal verification for:
 
 **The Gaussian Strikes Back: Identifiability of LeJEPA World Models**
-David Klindt (Cold Spring Harbor Laboratory) and Randall Balestriero (Brown University)
+David Klindt (Cold Spring Harbor Laboratory), Yann LeCun (New York University) and Randall Balestriero (Brown University)
 
 We prove that any encoder minimizing pairwise distance between positive pairs while preserving Gaussianity (via SIGReg) must recover the true latent variables up to an orthogonal transformation. The proof uses Hermite polynomials — the natural Fourier basis of the Gaussian measure — to show that any nonlinear distortion strictly increases the alignment loss.
 
@@ -19,9 +19,10 @@ Try the 2D demo in your browser (runs in ~30s on a T4 GPU):
 lejepa-identifiability/
 ├── lean/                        # Lean 4 formal verification
 │   ├── LeJEPA/
-│   │   ├── ThmHermite.lean      # Theorem (Hermite polynomial proof)
-│   │   ├── ThmDirichlet.lean    # Alternative proof (Dirichlet energy)
-│   │   └── PropApprox.lean      # Approximate identifiability bound
+│   │   ├── Hermite.lean      # Theorem (Hermite polynomial proof)
+│   │   └── Uniqueness.lean   # Uniqueness of Gaussian proof
+│   │   └── Approx.lean       # Approximate identifiability bound
+│   │   ├── Dirichlet.lean    # Alternative proof (Dirichlet energy)
 │   ├── LeJEPA.lean
 │   ├── lakefile.lean
 │   └── lean-toolchain           # Lean 4 v4.28.0
@@ -90,7 +91,7 @@ python experiments/plot_bound.py --results_dir results/ --out figures/
 ```bibtex
 @inproceedings{klindt2025lejepa,
   title={The Gaussian Strikes Back: Identifiability of LeJEPA World Models},
-  author={Klindt, David and Balestriero, Randall},
+  author={Klindt, David and LeCun, Yann and Balestriero, Randall},
   booktitle={NeurIPS},
   year={2025}
 }
