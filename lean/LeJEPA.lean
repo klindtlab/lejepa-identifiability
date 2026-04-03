@@ -1,6 +1,7 @@
-import LeJEPA.ThmHermite
-import LeJEPA.ThmDirichlet
-import LeJEPA.PropApprox
+import LeJEPA.Hermite
+import LeJEPA.Uniqueness
+import LeJEPA.Approx
+import LeJEPA.Dirichlet
 
 /-!
 # LeJEPA Identifiability: Formal Verification in Lean 4
