@@ -1,0 +1,46 @@
+# 2D illustration experiments (paper figure)
+# python run.py --config configs/2d.yaml --run spiral --seed 1337
+
+experiment: 2d
+out: results/2d
+
+# Data
+N: 2
+source_dist: gaussian
+num_eval: 10000
+
+# Training (shared)
+steps: 20000
+lr: 3.0e-3
+batch_size: 256
+rho: 0.95
+log_every: 500
+
+# Per-run specs: mixing, encoder, mode, lamb
+runs:
+  spiral:
+    mixing: spiral
+    encoder: mlp
+    hidden: 256
+    mode: lejepa
+    lamb: 1.0e-3
+  banana:
+    mixing: banana
+    encoder: mlp
+    hidden: 256
+    mode: lejepa
+    lamb: 1.0e-3
+  sinusoid:
+    mixing: sinusoid
+    encoder: mlp
+    hidden: 256
+    mode: lejepa
+    lamb: 1.0e-3
+  nvp:
+    mixing: nvp
+    encoder: matched
+    n_layers: 8
+    mode: lejepa
+    lamb: 1.0e-3
+
+seeds: [1337, 1338, 1339]

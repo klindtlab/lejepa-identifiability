@@ -17,21 +17,43 @@ Try the 2D demo in your browser (runs in ~30s on a T4 GPU):
 
 ```
 lejepa-identifiability/
-├── lean/                        # Lean 4 formal verification
+├── lean/                           # Lean 4 formal verification
 │   ├── LeJEPA/
-│   │   ├── Hermite.lean      # Theorem (Hermite polynomial proof)
-│   │   └── Uniqueness.lean   # Uniqueness of Gaussian proof
-│   │   └── Approx.lean       # Approximate identifiability bound
-│   │   ├── Dirichlet.lean    # Alternative proof (Dirichlet energy)
+│   │   ├── Hermite.lean            # Theorem (Hermite polynomial proof)
+│   │   ├── Uniqueness.lean         # Uniqueness of Gaussian proof
+│   │   ├── Approx.lean             # Approximate identifiability bound
+│   │   └── Dirichlet.lean          # Alternative proof (Dirichlet energy)
 │   ├── LeJEPA.lean
 │   ├── lakefile.lean
-│   └── lean-toolchain           # Lean 4 v4.28.0
+│   └── lean-toolchain              # Lean 4 v4.28.0
 ├── experiments/
-│   ├── demo_2d.py               # 2D demo (also on Colab above)
-│   ├── run_single.py            # Training: single run with metrics + bound
-│   ├── aggregate_results.py     # Heatmaps + training curves from grid search
-│   ├── plot_bound.py            # Bound verification scatter plots
-│   └── launch_grid.sh           # SLURM launcher for λ × ρ grid search
+│   ├── lejepa_id/                  # Shared library
+│   │   ├── mixing.py               # Mixing functions (spiral, banana, sinusoid, coupling)
+│   │   ├── models.py               # MLP and matched (inverse-NVP) encoders
+│   │   ├── losses.py               # SIGReg, whitening, alignment
+│   │   ├── metrics.py              # R², orthogonality, bound quantities
+│   │   ├── data.py                 # Gaussian/Laplace sampling, OU augmentation
+│   │   └── engine.py               # Training loop (warmup + cosine LR, online data)
+│   ├── run.py                      # Unified runner (loads config, trains, saves)
+│   ├── analysis/                   # Post-hoc plotting and tables
+│   │   ├── plot_2d.py              # 2D scatter figures
+│   │   ├── plot_laplace.py         # Laplace ablation figures
+│   │   ├── plot_scaling.py         # Scaling curves
+│   │   ├── plot_bound.py           # Bound verification + heatmaps
+│   │   ├── plot_scatter.py         # Cross-experiment diagnostics
+│   │   ├── aggregate.py            # Collect .json results into CSV
+│   │   ├── make_table_scaling.py   # LaTeX table from scaling results
+│   │   └── run_all.sh              # Regenerate all figures
+│   ├── configs/                    # Experiment hyperparameters
+│   │   ├── 2d.yaml
+│   │   ├── laplace.yaml
+│   │   ├── scaling.yaml
+│   │   └── grid.yaml
+│   └── slurm/                      # SLURM launch scripts (CSHL cluster)
+│       ├── launch_2d.sh
+│       ├── launch_laplace.sh
+│       ├── launch_scaling.sh
+│       └── launch_grid.sh
 ├── requirements.txt
 └── README.md
 ```
@@ -40,7 +62,7 @@ lejepa-identifiability/
 
 All three theoretical results are formalized in Lean 4 with Mathlib. The project compiles with **zero `sorry` obligations** — every logical chain from axiomatized premises to conclusions is machine-checked.
 
-Axiomatized components are standard results not yet available in Mathlib (Hermite polynomial infrastructure, Mazur–Ulam, AM-GM with uniform weights). See the paper appendix for the full verification inventory.
+Axiomatized components are standard results not yet available in Mathlib (Hermite polynomial infrastructure, Mazur-Ulam, AM-GM with uniform weights). See the paper appendix for the full verification inventory.
 
 ### Building
 
@@ -51,33 +73,65 @@ lake build    # requires Lean 4 v4.28.0, fetches Mathlib automatically
 
 ## Experiments
 
-### 2D Demo
-
-The demo trains an encoder on a nonlinear spiral mixing and supports two modes: `lejepa` (alignment + SIGReg) and `whiten` (alignment + covariance whitening). Run locally or on [Colab](https://colab.research.google.com/drive/1ozjRk3FfUIDX7WBqlOKvhNcIamy0JxCH?usp=sharing):
+All experiments share the same training infrastructure (`lejepa_id/engine.py`) and are launched through a single runner that reads all parameters from YAML configs:
 
 ```bash
-python experiments/demo_2d.py
+pip install -r requirements.txt
+cd experiments
+python run.py --config configs/<experiment>.yaml --run <run_name> --seed <seed>
 ```
 
-### Grid Search (λ × ρ)
+Training uses online data generation (infinite data regime), a warmup + cosine LR schedule, and saves results as `.json` (scalars and training curves). 2D and Laplace experiments additionally save `.pt` files with scatter-plot arrays.
 
-Single run with all metrics (MCC, R², orthogonality, bound quantities):
+### 2D Illustrations
+
+Four mixing functions (spiral, banana, sinusoidal shear, NVP) with MLP or matched encoders. Multiple seeds, best picked by final loss.
 
 ```bash
-python experiments/run_single.py --lamb 0.01 --rho 0.9 --seed 0 --steps 10000
+python run.py --config configs/2d.yaml --run spiral --seed 1337
+python analysis/plot_2d.py --results_dir results/2d/ --out figures/
 ```
 
-Full grid search (6 λ values × 7 ρ values × 5 seeds = 210 runs) on SLURM:
+### Laplace Ablation
+
+Same mixings with Laplace sources, trained with both LeJEPA and whitening objectives. Shows that linear identifiability fails for non-Gaussian sources.
 
 ```bash
-sbatch experiments/launch_grid.sh
+python run.py --config configs/laplace.yaml --run spiral_lejepa --seed 1337
+python analysis/plot_laplace.py --results_dir results/laplace/ --out figures/
 ```
 
-After completion, generate figures:
+### Scaling (N = 2 to 1024)
+
+Matched (inverse-NVP) encoder scaling with latent dimension. Each (N, seed) trains K=3 encoders in parallel (for N ≤ 32) and picks the best.
 
 ```bash
-python experiments/aggregate_results.py --results_dir results/ --out figures/
-python experiments/plot_bound.py --results_dir results/ --out figures/
+python run.py --config configs/scaling.yaml --N 16 --seed 0
+python analysis/plot_scaling.py --results_dir results/scaling/ --out figures/
+```
+
+### Grid Search / Bound Verification
+
+Sweep over regularization weight and OU correlation on the 2D spiral mixing.
+
+```bash
+python run.py --config configs/grid.yaml --lamb 0.01 --rho 0.9 --seed 0
+python analysis/plot_bound.py --results_dirs results/grid results/2d results/scaling results/laplace --out figures/
+```
+
+### Cross-Experiment Analysis
+
+Pool all results for loss-vs-R², SIGReg-vs-whitening, and bound-vs-error scatter plots:
+
+```bash
+python analysis/aggregate.py --results_dir results/ --recursive --out results/all.csv
+python analysis/plot_scatter.py --results_dirs results/2d results/laplace results/scaling results/grid --out figures/
+```
+
+### Regenerate All Figures
+
+```bash
+bash analysis/run_all.sh
 ```
 
 ## Requirements
@@ -89,10 +143,10 @@ python experiments/plot_bound.py --results_dir results/ --out figures/
 ## Citation
 
 ```bibtex
-@inproceedings{klindt2025lejepa,
+@article{klindt2025lejepa,
   title={The Gaussian Strikes Back: Identifiability of LeJEPA World Models},
   author={Klindt, David and LeCun, Yann and Balestriero, Randall},
-  booktitle={NeurIPS},
+  journal={arXiv preprint},
   year={2025}
 }
 ```

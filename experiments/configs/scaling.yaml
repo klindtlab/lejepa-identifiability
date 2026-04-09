@@ -1,0 +1,30 @@
+# Scaling experiment (paper figure)
+# python run.py --config configs/scaling.yaml --N 16 --seed 0
+
+experiment: scaling
+out: results/scaling
+
+# Data
+source_dist: gaussian
+num_eval: 10000
+
+# Training (shared)
+steps: 20000
+lr: 3.0e-3
+batch_size: 256
+rho: 0.95
+lamb: 1.0e-6
+log_every: 500
+
+# Encoder
+encoder: matched
+n_layers: 4
+mode: lejepa
+
+# Mixing
+mixing: coupling
+
+# Sweep dimensions
+dims: [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
+seeds: [0, 1, 2, 3, 4]
+K: 3  # parallel encoder runs per (N, seed); pick lowest loss

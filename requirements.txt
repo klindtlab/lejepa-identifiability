@@ -1,4 +1,7 @@
-torch
+torch>=2.0
 numpy
 scipy
+scikit-learn
 matplotlib
+pandas
+pyyaml
