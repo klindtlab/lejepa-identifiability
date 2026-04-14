@@ -5,10 +5,15 @@ __pycache__/
 
 # Jupyter
 .ipynb_checkpoints/
+local/
+
+# Data
+data/
 
 # Results (large tensors)
 results*/
 figures/
+logs/
 
 # Lean
 lean/.lake/
