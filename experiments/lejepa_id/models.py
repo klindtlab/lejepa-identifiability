@@ -41,3 +41,15 @@ class MatchedEncoder(nn.Module):
 def make_matched_encoder(N, n_layers=4, seed=42, device="cuda"):
     torch.manual_seed(seed)
     return MatchedEncoder(N, n_layers=n_layers, device=device).to(device)
+
+
+def make_cnn_encoder(d_latent=2, device="cuda"):
+    return nn.Sequential(
+        nn.Conv2d(3, 32, 4, 2, 1), nn.BatchNorm2d(32), nn.GELU(),
+        nn.Conv2d(32, 64, 4, 2, 1), nn.BatchNorm2d(64), nn.GELU(),
+        nn.Conv2d(64, 128, 4, 2, 1), nn.BatchNorm2d(128), nn.GELU(),
+        nn.Conv2d(128, 256, 4, 2, 1), nn.BatchNorm2d(256), nn.GELU(),
+        torch.nn.AvgPool2d(4), nn.Flatten(),
+        nn.Linear(256, 256), nn.BatchNorm1d(256), nn.GELU(),
+        nn.Linear(256, d_latent),
+    ).to(device)

@@ -1,0 +1,29 @@
+# Reacher pixel-observation identifiability experiment
+# Works for both OU and trajectory data — just point --data_dir at the right place.
+#
+# Prerender:
+#   python prerender.py eval
+#   python prerender.py ou --rho 0.95
+#   python prerender.py traj --delta 16 --h5_path data/reacher.h5
+#
+# Train:
+#   python run_reacher.py --config configs/reacher.yaml \
+#       --data_dir data/reacher/ou/rho=0.95
+
+experiment: reacher
+out: results/reacher
+data_root: data/reacher
+
+# Model
+d_latent: 2
+
+# Training
+epochs: 100
+batch_size: 256
+lr: 3.0e-3
+n_slices: 256
+n_eval_fast: 2000
+
+# Sweep dimensions
+lambs: [1.0e-3, 5.0e-3, 1.0e-2, 5.0e-2]
+seeds: [0, 1, 2]
