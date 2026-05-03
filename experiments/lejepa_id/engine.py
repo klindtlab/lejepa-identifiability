@@ -9,7 +9,7 @@ on a fixed eval set, standardized output schema.
 import torch
 import numpy as np
 
-from .losses import SIGReg, whitening_loss, alignment_loss
+from .losses import SIGReg, whitening_loss, alignment_loss, infonce_loss
 from .data import sample_latents, ou_augment
 from .metrics import compute_all_metrics
 
@@ -30,8 +30,10 @@ def train_and_evaluate(
     N,
     rho,
     lamb,
+    sigma=1.0,
     mode="lejepa",
     source_dist="gaussian",
+    source_alpha=None,
     steps=20000,
     batch_size=256,
     lr=3e-3,
@@ -48,7 +50,7 @@ def train_and_evaluate(
         rho: OU correlation
         lamb: regularization weight
         mode: "lejepa" or "whiten"
-        source_dist: "gaussian" or "laplace"
+        source_dist: "gaussian", "laplace", or "gennorm"
         steps: total training steps
         batch_size: batch size (online data)
         lr: peak learning rate
@@ -85,8 +87,9 @@ def train_and_evaluate(
             pg["lr"] = current_lr
 
         # Online data
-        z_batch = sample_latents(batch_size, N, dist=source_dist, device=device)
-        z_aug = ou_augment(z_batch, rho)  # (2, B, N)
+        z_batch = sample_latents(batch_size, N, dist=source_dist,
+                                 device=device, alpha=source_alpha)
+        z_aug = ou_augment(z_batch, rho, dist=source_dist, alpha=source_alpha)  # (2, B, N)
         h = encoder(mix_fn(z_aug).flatten(0, 1)).reshape(2, batch_size, N)
 
         align = alignment_loss(h)
@@ -95,8 +98,12 @@ def train_and_evaluate(
 
         if mode == "lejepa":
             loss = lamb * sig + (1 - lamb) * align
-        else:
+        elif mode == "whiten":
             loss = lamb * wht + (1 - lamb) * align
+        elif mode == "infonce":
+            loss = infonce_loss(h, sigma)
+        else:
+            raise ValueError(f"Unknown mode: {mode}")
 
         opt.zero_grad()
         loss.backward()
@@ -114,7 +121,10 @@ def train_and_evaluate(
             encoder.eval()
             with torch.no_grad():
                 h_eval = encoder(x_eval)
-                z_prime = ou_augment(z_eval, rho, n_views=1).squeeze(0)
+                z_prime = ou_augment(
+                    z_eval, rho, n_views=1, 
+                    dist=source_dist, alpha=source_alpha
+                ).squeeze(0)
                 h_prime = encoder(mix_fn(z_prime))
 
             metrics = compute_all_metrics(z_eval, x_eval, h_eval, h_prime, rho, N)

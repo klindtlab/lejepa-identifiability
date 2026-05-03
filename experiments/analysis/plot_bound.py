@@ -6,7 +6,9 @@ bound_decomposition.pdf — grid search only (appendix)
 heatmap_*.pdf           — grid search only (appendix)
 
 Usage:
-    python analysis/plot_bound.py --results_dirs results/grid results/2d results/scaling results/laplace --out figures/
+    python analysis/plot_bound.py \
+    --results_dirs results/grid results/2d results/scaling results/gennorm \
+    --out figures/
 """
 
 import argparse, os, glob, json
@@ -14,26 +16,57 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-mpl.rcParams.update({
-    "font.size": 10, "axes.titlesize": 11, "axes.labelsize": 10,
-    "figure.dpi": 200, "font.family": "serif",
-})
+# mpl.rcParams.update({
+#     "font.size": 10, "axes.titlesize": 11, "axes.labelsize": 10,
+#     "figure.dpi": 200, "font.family": "serif",
+# })
 
-EXPERIMENT_COLORS = {"2d": "tab:blue", "grid": "tab:red", "scaling": "tab:green", "laplace": "tab:orange"}
-EXPERIMENT_MARKERS = {"2d": "o", "grid": "D", "scaling": "s", "laplace": "^"}
-EXPERIMENT_ORDER = ["grid", "scaling", "2d", "laplace"]
+EXPERIMENT_COLORS = {
+    "2d":      "tab:blue",
+    "grid":    "tab:red",
+    "scaling": "tab:green",
+    "reacher": "tab:purple",
+    "gennorm": "tab:orange",
+}
+EXPERIMENT_MARKERS = {
+    "2d":      "o",
+    "grid":    "D",
+    "scaling": "s",
+    "reacher": "v",
+    "gennorm": "^",
+}
+EXPERIMENT_ORDER = ["grid", "scaling", "2d", "reacher", "gennorm"]
+
+
+def is_valid_run(r, path=""):
+    """SIGReg + Gaussian source + non-degenerate (encoder actually learned)."""
+    if r.get("mode") != "lejepa":
+        return False
+    sd = r.get("source_dist", "gaussian")
+    if sd == "gennorm" and abs(r.get("source_alpha", 0) - 2.0) > 1e-6:
+        return False
+    if sd not in ("gaussian", "gennorm"):
+        return False
+    # Drop degenerate runs where the encoder failed to learn
+    if r.get("r2_hz", 0) < 0.5:
+        return False
+    return True
 
 
 def load_all(dirs):
     data = []
     for d in dirs:
-        for path in sorted(glob.glob(os.path.join(d, "*.json"))):
+        for path in sorted(glob.glob(os.path.join(d, "**", "*.json"), recursive=True)):
             with open(path) as f:
                 r = json.load(f)
+            if not isinstance(r, dict):
+                continue
             if r.get("approx_bound") is None or r.get("procrustes_mse") is None:
                 continue
+            if not is_valid_run(r, path):
+                continue
             data.append(r)
-    print(f"Loaded {len(data)} runs")
+    print(f"Loaded {len(data)} Gaussian-source runs")
     return data
 
 
@@ -55,7 +88,7 @@ def main():
     bounds = np.array([d["approx_bound"] for d in data])
     experiments = [d["experiment"] for d in data]
 
-    fig, ax = plt.subplots(figsize=1.0 * np.array((3, 3)))
+    fig, ax = plt.subplots(figsize=0.8 * np.array((3, 3)))
 
     pos = (errors > 0) & (bounds > 0)
     lo = min(errors[pos].min(), bounds[pos].min()) * 0.3
@@ -71,7 +104,7 @@ def main():
         ax.scatter(bounds[mask], errors[mask],
                    c=EXPERIMENT_COLORS[exp],
                    marker=EXPERIMENT_MARKERS[exp],
-                   s=25, alpha=0.7, edgecolors='k', linewidths=0.3,
+                   s=32, alpha=0.7, edgecolors='k', linewidths=0.3,
                    label=exp, zorder=3)
     
     ax.plot([lo, hi], [lo, hi], 'k--', alpha=0.5, linewidth=0.8)
@@ -79,7 +112,7 @@ def main():
     ax.set_xlim(lo, hi)
     ax.set_ylim(lo, hi)
     ax.set_xlabel("Recovery error bound")
-    ax.set_ylabel("Actual recovery error")
+    ax.set_ylabel("Recovery error")
     ax.legend(fontsize=7, loc='upper left', framealpha=0.9)
     ax.grid(alpha=0.3)
     ax.set_aspect("equal")

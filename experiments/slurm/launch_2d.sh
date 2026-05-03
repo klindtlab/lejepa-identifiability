@@ -8,18 +8,20 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --time=02:00:00
-#SBATCH --array=0-11   # 4 runs x 3 seeds
+#SBATCH --array=0-7   # 8 runs; seeds loop inside
 
-RUNS=(spiral banana sinusoid nvp)
+RUNS=(spiral_lejepa spiral_whiten banana_lejepa banana_whiten \
+      sinusoid_lejepa sinusoid_whiten nvp_lejepa nvp_whiten)
 SEEDS=(1337 1338 1339)
 
-N_SEEDS=${#SEEDS[@]}
-RUN_IDX=$(( SLURM_ARRAY_TASK_ID / N_SEEDS ))
-SEED_IDX=$(( SLURM_ARRAY_TASK_ID % N_SEEDS ))
+RUN=${RUNS[$SLURM_ARRAY_TASK_ID]}
 
 eval "$(conda shell.bash hook)"
 conda activate pytorch
 
 mkdir -p logs
-python run.py --config configs/2d.yaml \
-    --run "${RUNS[$RUN_IDX]}" --seed "${SEEDS[$SEED_IDX]}"
+for SEED in "${SEEDS[@]}"; do
+    echo "${RUN} seed=${SEED}"
+    python run.py --config configs/2d.yaml \
+        --run "${RUN}" --seed "${SEED}"
+done

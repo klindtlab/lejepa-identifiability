@@ -4,7 +4,7 @@ calls engine.train_and_evaluate, saves standardized .pt output.
 
 Usage:
     python run.py --config configs/2d.yaml --run spiral --seed 1337
-    python run.py --config configs/laplace.yaml --run spiral_lejepa --seed 1337
+    python run.py --config configs/ablation.yaml --run spiral_lejepa --seed 1337
     python run.py --config configs/scaling.yaml --N 16 --seed 0
     python run.py --config configs/grid.yaml --lamb 0.01 --rho 0.9 --seed 0
 """
@@ -16,7 +16,7 @@ import numpy as np
 from lejepa_id.mixing import MIXINGS_2D, make_coupling_mixing
 from lejepa_id.models import make_mlp_encoder, make_matched_encoder
 from lejepa_id.data import sample_latents, ou_augment
-from lejepa_id.metrics import compute_all_metrics
+from lejepa_id.metrics import compute_all_metrics, compute_recovery_metrics
 from lejepa_id.engine import train_and_evaluate
 
 
@@ -70,6 +70,8 @@ def resolve_run_spec(cfg, args):
         "batch_size": cfg.get("batch_size", 256),
         "rho": cfg.get("rho", 0.95),
         "lamb": cfg.get("lamb"),
+        "sigma": cfg.get("sigma", 1.0),
+        "source_alpha": cfg.get("source_alpha"),   # NEW
         "log_every": cfg.get("log_every", 100),
         "encoder": cfg.get("encoder", "mlp"),
         "hidden": cfg.get("hidden", 256),
@@ -79,12 +81,12 @@ def resolve_run_spec(cfg, args):
         "seed": args.seed,
     }
 
-    if experiment in ("2d", "laplace"):
+    if experiment in ("2d", "ablation"):
         # Look up run-specific overrides
         run_name = args.run
         run_cfg = cfg["runs"][run_name]
         spec["run_name"] = run_name
-        for k in ("mixing", "encoder", "hidden", "n_layers", "mode", "lamb"):
+        for k in ("mixing", "encoder", "hidden", "n_layers", "mode", "lamb", "sigma"):
             if k in run_cfg:
                 spec[k] = run_cfg[k]
 
@@ -98,6 +100,18 @@ def resolve_run_spec(cfg, args):
         spec["lamb"] = args.lamb
         spec["rho"] = args.rho
         spec["run_name"] = f"lamb={args.lamb:.0e}_rho={args.rho:.2f}"
+
+    elif experiment == "gennorm":
+        if args.alpha is None:
+            raise ValueError("--alpha required for gennorm experiment")
+        spec["source_dist"] = "gennorm"
+        spec["source_alpha"] = args.alpha
+        run_name = args.run
+        run_cfg = cfg["runs"][run_name]
+        for k in ("mixing", "encoder", "hidden", "n_layers", "mode", "lamb", "sigma"):
+            if k in run_cfg:
+                spec[k] = run_cfg[k]
+        spec["run_name"] = f"{run_name}_alpha={args.alpha:g}"
 
     return spec
 
@@ -122,13 +136,16 @@ def run_single(spec, device):
                             n_layers=n_layers, seed=enc_seed, device=device)
 
     # Fixed eval set
-    z_eval = sample_latents(spec["num_eval"], N, dist=spec["source_dist"], device=device)
+    z_eval = sample_latents(spec["num_eval"], N, dist=spec["source_dist"],
+                            device=device, alpha=spec.get("source_alpha"))
 
     # Train
     encoder, log = train_and_evaluate(
         encoder, mix_fn,
         N=N, rho=spec["rho"], lamb=spec["lamb"], mode=spec["mode"],
         source_dist=spec["source_dist"],
+        source_alpha=spec.get("source_alpha"),
+        sigma=spec["sigma"],
         steps=spec["steps"], batch_size=spec["batch_size"], lr=spec["lr"],
         z_eval=z_eval, log_every=spec["log_every"], device=device,
     )
@@ -138,17 +155,31 @@ def run_single(spec, device):
     with torch.no_grad():
         x_eval = mix_fn(z_eval)
         h_eval = encoder(x_eval)
-        z_prime = ou_augment(z_eval, spec["rho"], n_views=1).squeeze(0)
+        # z_prime = ou_augment(z_eval, spec["rho"], n_views=1).squeeze(0)
+        z_prime = ou_augment(
+            z_eval, spec["rho"], n_views=1,
+            dist=spec["source_dist"],
+            alpha=spec.get("source_alpha")
+        ).squeeze(0)
         h_prime = encoder(mix_fn(z_prime))
 
     final_metrics = compute_all_metrics(
         z_eval, mix_fn(z_eval), h_eval, h_prime, spec["rho"], N,
     )
 
-    # Large scatter data for plotting (only for 2d/laplace)
-    if spec["experiment"] in ("2d", "laplace"):
+    # Fixed-grid evaluation (cross-distribution comparable, only for 2D)
+    if N == 2:
         with torch.no_grad():
-            z_plot = sample_latents(100000, N, dist=spec["source_dist"], device=device)
+            g = torch.linspace(-3.0, 3.0, 100, device=device)
+            z_grid = torch.stack(torch.meshgrid(g, g, indexing='ij'), dim=-1).reshape(-1, N)
+            h_grid = encoder(mix_fn(z_grid))
+        final_metrics.update(compute_recovery_metrics(z_grid, h_grid, N, suffix="_grid"))
+
+    # Large scatter data for plotting (only for 2d/ablation)
+    if spec["experiment"] in ("2d", "ablation"):
+        with torch.no_grad():
+            z_plot = sample_latents(100000, N, dist=spec["source_dist"],
+                                    device=device, alpha=spec.get("source_alpha"))
             x_plot = mix_fn(z_plot)
             h_chunks = []
             for i in range(0, len(z_plot), 10000):
@@ -169,6 +200,7 @@ def run_single(spec, device):
         "encoder": spec["encoder"],
         "mode": spec["mode"],
         "source_dist": spec["source_dist"],
+        "source_alpha": spec.get("source_alpha"),
         "seed": seed,
         "N": N,
         # Hyperparameters
@@ -189,7 +221,7 @@ def run_single(spec, device):
         "log": log,
     }
 
-    # Heavy data (arrays + model) — only saved as .pt for 2d/laplace
+    # Heavy data (arrays + model) — only saved as .pt for 2d/ablation
     arrays = {
         "z": z_np, "x": x_np, "h": h_np,
         "model_state_dict": encoder.state_dict(),
@@ -206,7 +238,7 @@ def save_result(result, arrays, out_dir, fname_base, save_pt=False):
         json.dump(_jsonify(result), f, indent=2)
     print(f"Saved {fname_base}.json")
 
-    # .pt (arrays + model) for 2d/laplace scatter plots
+    # .pt (arrays + model) for 2d/ablation scatter plots
     if save_pt:
         pt_path = os.path.join(out_dir, fname_base + ".pt")
         torch.save({**result, **arrays}, pt_path)
@@ -217,11 +249,12 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--config", type=str, required=True)
     # Sweep variables (CLI overrides)
-    p.add_argument("--run", type=str, default=None, help="Run name (2d/laplace)")
+    p.add_argument("--run", type=str, default=None, help="Run name (2d/ablation)")
     p.add_argument("--seed", type=int, required=True)
     p.add_argument("--N", type=int, default=None, help="Latent dim (scaling)")
     p.add_argument("--lamb", type=float, default=None, help="Lambda (grid)")
     p.add_argument("--rho", type=float, default=None, help="Rho (grid)")
+    p.add_argument("--alpha", type=float, default=None, help="Gennorm shape (gennorm)")
     args = p.parse_args()
 
     with open(args.config) as f:
@@ -235,7 +268,7 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
 
     experiment = cfg["experiment"]
-    save_pt = experiment in ("2d", "laplace")
+    save_pt = experiment in ("2d", "ablation")
 
     if experiment == "scaling":
         # For small N, train K encoders, pick best

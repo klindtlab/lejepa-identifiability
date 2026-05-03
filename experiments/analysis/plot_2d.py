@@ -26,12 +26,14 @@ def make_colors(z):
 
 
 def load_best_per_mixing(results_dir):
-    """Load all results, pick best seed per mixing by final_loss."""
+    """Load all results, pick best lejepa run per mixing by final_loss."""
     files = sorted(glob.glob(os.path.join(results_dir, "*.pt")))
     by_mix = {}
     for path in files:
         r = torch.load(path, map_location="cpu", weights_only=False)
-        mix = r["run_name"]  # e.g. "spiral"
+        if r.get("mode") != "lejepa":
+            continue
+        mix = r["mixing"]
         if mix not in by_mix or r["final_loss"] < by_mix[mix]["final_loss"]:
             by_mix[mix] = r
     return by_mix

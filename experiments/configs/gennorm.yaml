@@ -1,0 +1,32 @@
+# Generalized normal sweep across mixings (main-text figure)
+# python run.py --config configs/gennorm.yaml --run spiral_lejepa --alpha 2.0 --seed 1337
+
+experiment: gennorm
+out: results/gennorm
+
+N: 2
+source_dist: gennorm   # alpha provided per-run via CLI
+num_eval: 10000
+
+steps: 20000
+lr: 3.0e-3
+batch_size: 256
+rho: 0.95
+log_every: 500
+
+runs:
+  spiral_lejepa:    {mixing: spiral,   encoder: mlp,     hidden: 256, mode: lejepa,  lamb: 1.0e-3}
+  spiral_whiten:    {mixing: spiral,   encoder: mlp,     hidden: 256, mode: whiten,  lamb: 0.5}
+  spiral_infonce:   {mixing: spiral,   encoder: mlp,     hidden: 256, mode: infonce, sigma: 1.0}
+  banana_lejepa:    {mixing: banana,   encoder: mlp,     hidden: 256, mode: lejepa,  lamb: 1.0e-3}
+  banana_whiten:    {mixing: banana,   encoder: mlp,     hidden: 256, mode: whiten,  lamb: 0.5}
+  banana_infonce:   {mixing: banana,   encoder: mlp,     hidden: 256, mode: infonce, sigma: 1.0}
+  sinusoid_lejepa:  {mixing: sinusoid, encoder: mlp,     hidden: 256, mode: lejepa,  lamb: 1.0e-3}
+  sinusoid_whiten:  {mixing: sinusoid, encoder: mlp,     hidden: 256, mode: whiten,  lamb: 0.5}
+  sinusoid_infonce: {mixing: sinusoid, encoder: mlp,     hidden: 256, mode: infonce, sigma: 1.0}
+  nvp_lejepa:       {mixing: nvp,      encoder: matched, n_layers: 8, mode: lejepa,  lamb: 1.0e-3}
+  nvp_whiten:       {mixing: nvp,      encoder: matched, n_layers: 8, mode: whiten,  lamb: 0.5}
+  nvp_infonce:      {mixing: nvp,      encoder: matched, n_layers: 8, mode: infonce, sigma: 1.0}
+
+alphas: [0.125, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0]
+seeds: [1337, 1338, 1339]

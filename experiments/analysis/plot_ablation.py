@@ -3,7 +3,8 @@ Laplace ablation: 4 rows (mixings) x 4 cols (z, g(z), h_lejepa, h_whiten).
 Picks best seed per (mixing, mode) by final_loss.
 
 Usage:
-    python analysis/plot_laplace.py --results_dir results/laplace/ --out figures/
+    python analysis/plot_ablation.py --results_dir results/ablation_alpha_0.25/ --prefix ablation_alpha_0.25 --out figures/
+    python analysis/plot_ablation.py --results_dir results/ablation_alpha_16/   --prefix ablation_alpha_16   --out figures/
 """
 
 import argparse, os, glob
@@ -33,13 +34,15 @@ def load_best(results_dir):
         key = r["run_name"]  # e.g. "spiral_lejepa"
         if key not in by_key or r["final_loss"] < by_key[key]["final_loss"]:
             by_key[key] = r
-    return by_key
+    return by_key        
 
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--results_dir", default="results/laplace/")
+    p.add_argument("--results_dir", default="results/ablation/")
     p.add_argument("--out", default="figures/")
+    p.add_argument("--prefix", default="ablation",
+                   help="Output filename prefix (e.g. ablation_alpha_0.25)")
     args = p.parse_args()
     os.makedirs(args.out, exist_ok=True)
 
@@ -64,20 +67,21 @@ def main():
             ("Learned (Whiten) 0", "Learned (Whiten) 1"),
         ]
         panels = [z, lej["x"], lej["h"], wht["h"]]
-        r2s = [None, None, lej["r2_hz"], wht["r2_hz"]]
+        # r2s = [None, None, lej["r2_hz"], wht["r2_hz"]]
+        r2s = [None, None, lej["r2_hz_grid"], wht["r2_hz_grid"]]
 
         for i, (ax, data, labels, r2) in enumerate(zip(axes, panels, col_labels, r2s)):
             ax.scatter(data[:, 0], data[:, 1], c=colors, s=s, linewidths=0)
             ax.set_xlabel(labels[0])
             ax.set_ylabel(labels[1])
             ax.grid(alpha=0.3)
-            # if r2 is not None:
-            #     ax.text(0.95, 0.05, f"$R^2$={r2:.3f}", transform=ax.transAxes,
-            #             ha="right", va="bottom", fontsize=9,
-            #             bbox=dict(boxstyle="round,pad=0.2", fc="white", alpha=0.8))
+            if r2 is not None:
+                ax.text(0.95, 0.05, f"$R^2$={r2:.3f}", transform=ax.transAxes,
+                        ha="right", va="bottom", fontsize=9,
+                        bbox=dict(boxstyle="round,pad=0.2", fc="white", alpha=0.8))
 
         fig.tight_layout()
-        out_path = os.path.join(args.out, f"fig_laplace_{mix}.jpg")
+        out_path = os.path.join(args.out, f"fig_{args.prefix}_{mix}.jpg")
         fig.savefig(out_path, bbox_inches="tight", dpi=500)
         print(f"Saved {out_path}")
         plt.close()

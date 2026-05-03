@@ -55,6 +55,18 @@ def make_combined_table(ou_results, traj_results):
     lines = []
     lines.append(r"\begin{table}[t]")
     lines.append(r"\centering")
+    lines.append(r"\caption{")
+    lines.append(r"    \textbf{Pixel-observation identifiability on DMC Reacher} "
+                 r"(mean $\pm$ std over 3 seeds, best $\lambda$ per condition).")
+    lines.append(r"    \textbf{Left:} OU process with Gaussian marginals. "
+                 r"$R^2$ increases monotonically with $\rho$, reaching $0.95$ "
+                 r"at $\rho = 0.99$, confirming linear identifiability from pixels.")
+    lines.append(r"    \textbf{Right:} Real SAC trajectories with non-Gaussian marginals. "
+                 r"The two joints have different autocorrelation timescales ($\rho_0 \neq \rho_1$) "
+                 r"and the wrist has a near-uniform marginal distribution, "
+                 r"leading to anisotropic and reduced identifiability.")
+    lines.append(r"}")
+    lines.append(r"\label{tab:reacher}")
     lines.append(r"\resizebox{\textwidth}{!}{%")
     lines.append(r"\begin{tabular}{r cc | r cc ccc}")
     lines.append(r" \multicolumn{3}{c}{\textbf{OU (Gaussian)}} & "
@@ -100,18 +112,6 @@ def make_combined_table(ou_results, traj_results):
     lines.append(r"\bottomrule")
     lines.append(r"\end{tabular}}")
     lines.append(r"\vspace{5pt}")
-    lines.append(r"\caption{")
-    lines.append(r"    \textbf{Pixel-observation identifiability on DMC Reacher} "
-                 r"(mean $\pm$ std over 3 seeds, best $\lambda$ per condition).")
-    lines.append(r"    \textbf{Left:} OU process with Gaussian marginals. "
-                 r"$R^2$ increases monotonically with $\rho$, reaching $0.95$ "
-                 r"at $\rho = 0.99$, confirming linear identifiability from pixels.")
-    lines.append(r"    \textbf{Right:} Real SAC trajectories with non-Gaussian marginals. "
-                 r"The two joints have different autocorrelation timescales ($\rho_0 \neq \rho_1$) "
-                 r"and the wrist has a near-uniform marginal distribution, "
-                 r"leading to anisotropic and reduced identifiability.")
-    lines.append(r"}")
-    lines.append(r"\label{tab:reacher}")
     lines.append(r"\vspace{-20pt}")
     lines.append(r"\end{table}")
     return "\n".join(lines)

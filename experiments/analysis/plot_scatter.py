@@ -2,15 +2,15 @@
 Cross-experiment scatter plots (2x2 panel).
 
 Usage:
-    python analysis/plot_scatter.py --results_dirs results/2d results/scaling results/grid results/laplace --out figures/
+    python analysis/plot_scatter.py --results_dirs results/2d results/scaling results/grid results/ablation --out figures/
 """
 
 import argparse, os, glob, json
 import numpy as np
 import matplotlib.pyplot as plt
 
-EXPERIMENT_COLORS = {"2d": "tab:blue", "grid": "tab:red", "scaling": "tab:green", "laplace": "tab:orange"}
-EXPERIMENT_ORDER = ["grid", "scaling", "2d", "laplace"]
+EXPERIMENT_COLORS = {"2d": "tab:blue", "grid": "tab:red", "scaling": "tab:green", "ablation": "tab:orange"}
+EXPERIMENT_ORDER = ["grid", "scaling", "2d", "ablation"]
 
 
 def load_all(dirs):

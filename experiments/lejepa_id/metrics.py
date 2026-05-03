@@ -49,3 +49,17 @@ def compute_all_metrics(z, x, h, h_prime, rho, N):
         "approx_bound": approx_bound, "procrustes_mse": procrustes_mse,
         "L_h": L_h, "trace_cov": trace_cov,
     }
+
+
+def compute_recovery_metrics(z, h, N, suffix=""):
+    """R² in both directions + orthogonality. Suffix appended to keys."""
+    r2_zh, r2_hz = bidirectional_r2(z, h)
+    z1 = torch.cat([z, torch.ones(len(z), 1, device=z.device)], dim=1)
+    W = torch.linalg.lstsq(z1, h).solution
+    A = W[:N].T
+    orth_err = torch.linalg.norm(A.T @ A - torch.eye(N, device=A.device), 'fro').item()
+    return {
+        f"r2_zh{suffix}": r2_zh, f"r2_hz{suffix}": r2_hz,
+        f"orth_err{suffix}": orth_err,
+        f"orth_err_normalized{suffix}": orth_err / (N ** 0.5),
+    }

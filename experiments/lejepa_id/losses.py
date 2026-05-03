@@ -39,3 +39,15 @@ def whitening_loss(h):
 def alignment_loss(h):
     """Pull positive-pair views together. h: (V, B, N) -> scalar."""
     return (h.mean(0) - h).square().mean()
+
+
+def infonce_loss(h, sigma):
+    """Symmetric Gaussian-kernel InfoNCE: sim(u, v) = -||u - v||² / (2σ²).
+    h: (V, B, N) with V=2 views. Negatives are other batch elements.
+    """
+    h1, h2 = h[0], h[1]                                              # (B, N) each
+    d12 = ((h1.unsqueeze(1) - h2.unsqueeze(0)) ** 2).sum(-1)         # (B, B)
+    sim = -d12 / (2 * sigma ** 2)
+    loss_a = -(sim.diag() - torch.logsumexp(sim, dim=1)).mean()
+    loss_b = -(sim.diag() - torch.logsumexp(sim, dim=0)).mean()
+    return 0.5 * (loss_a + loss_b)
