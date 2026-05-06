@@ -93,8 +93,13 @@ def resolve_run_spec(cfg, args):
     elif experiment == "scaling":
         N = args.N
         spec["N"] = N
-        spec["run_name"] = f"N={N}"
         spec["mixing"] = "coupling"
+        if args.mode is not None:
+            spec["mode"] = args.mode
+        # Mode-specific lamb (whiten uses different default)
+        if spec["mode"] == "whiten":
+            spec["lamb"] = cfg.get("lamb_whiten", 0.5)
+        spec["run_name"] = f"N={N}_{spec['mode']}"
 
     elif experiment == "grid":
         spec["lamb"] = args.lamb
@@ -255,6 +260,8 @@ def main():
     p.add_argument("--lamb", type=float, default=None, help="Lambda (grid)")
     p.add_argument("--rho", type=float, default=None, help="Rho (grid)")
     p.add_argument("--alpha", type=float, default=None, help="Gennorm shape (gennorm)")
+    p.add_argument("--mode", type=str, default=None,
+               help="Override mode (lejepa/whiten/infonce)")
     args = p.parse_args()
 
     with open(args.config) as f:

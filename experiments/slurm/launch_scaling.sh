@@ -7,11 +7,12 @@
 #SBATCH --gres=gpu:v100:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
-#SBATCH --time=06:00:00
+#SBATCH --time=12:00:00     # ← bumped from 6h: 3 modes × 5 seeds = 15 runs per N
 #SBATCH --array=0-9   # 10 dims
 
 DIMS=(2 4 8 16 32 64 128 256 512 1024)
 SEEDS=(0 1 2 3 4)
+MODES=(lejepa whiten infonce)
 
 N=${DIMS[$SLURM_ARRAY_TASK_ID]}
 
@@ -20,10 +21,10 @@ conda activate pytorch
 
 mkdir -p logs
 
-for SEED in "${SEEDS[@]}"; do
-    echo "N=${N} seed=${SEED}"
-    python -u run.py --config configs/scaling.yaml \
-        --N "${N}" --seed "${SEED}"
+for MODE in "${MODES[@]}"; do
+    for SEED in "${SEEDS[@]}"; do
+        echo "N=${N} seed=${SEED} mode=${MODE}"
+        python -u run.py --config configs/scaling.yaml \
+            --N "${N}" --seed "${SEED}" --mode "${MODE}"
+    done
 done
-
-

@@ -1,5 +1,7 @@
 # Scaling experiment (paper figure)
 # python run.py --config configs/scaling.yaml --N 16 --seed 0
+# python run.py --config configs/scaling.yaml --N 16 --seed 0 --mode infonce
+# python run.py --config configs/scaling.yaml --N 16 --seed 0 --mode whiten
 
 experiment: scaling
 out: results/scaling
@@ -13,13 +15,17 @@ steps: 20000
 lr: 3.0e-3
 batch_size: 256
 rho: 0.95
-lamb: 1.0e-6
 log_every: 500
 
 # Encoder
 encoder: matched
 n_layers: 4
-mode: lejepa
+mode: lejepa     # default; override with --mode
+
+# Mode-specific defaults (used based on --mode)
+lamb: 1.0e-6     # for lejepa
+lamb_whiten: 0.5  # used when mode=whiten
+sigma: 1.0       # for infonce
 
 # Mixing
 mixing: coupling
