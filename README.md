@@ -1,7 +1,7 @@
 # LeJEPA Identifiability
 ### When Does LeJEPA Learn a World Model?
 
-[David Klindt](https://scholar.google.com/citations?user=EpT-nUAAAAAJ&hl=en), [Yann LeCun](https://yann.lecun.com/) and [Randall Balestriero](https://randallbalestriero.github.io/)
+[David Klindt](https://scholar.google.com/citations?user=EpT-nUAAAAAJ&hl=en), [Yann LeCun](https://scholar.google.com/citations?user=WLN3QrAAAAAJ&hl=en) and [Randall Balestriero](https://scholar.google.com/citations?user=S1x_xqcAAAAJ&hl=en&oi=ao)
 
 **Abstract:** A representation that scrambles the true degrees of freedom of the world cannot support reliable planning or compositional generalization. We prove that LeJEPA (alignment plus Gaussian regularization) linearly recovers the world's latent variables from nonlinear observations, a property known as *linear identifiability*, in a broad class of worlds where latents evolve under stationary, additive-noise transitions. Our main result is that among all such worlds, the Gaussian is the *unique* latent distribution for which this guarantee holds. The forward direction rests on a spectral decomposition in which each degree of nonlinearity is strictly penalized by alignment, making the linear map the optimum; the converse rules out every non-Gaussian alternative. We further prove an *approximate identifiability* result where the guarantee degrades gracefully, and show that linear, orthogonal identifiability enables *optimal latent-space planning*. We validate the theory across 2D examples to 1024-dimensional latents, distributional ablations, and pixel-based robotic control. All theorems are formally verified in Lean 4.
 
