@@ -1,0 +1,164 @@
+body {
+  font-family: 'CMU Serif', Georgia, serif;
+  font-weight: 500;
+}
+
+.footer .icon-link {
+  font-size: 25px;
+  color: #000;
+}
+
+.link-block a {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+/* Publication header */
+.publication-title {
+  font-family: 'CMU Serif', Georgia, serif;
+  font-weight: 700 !important;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.publication-title strong {
+  font-weight: 900 !important;
+  font-family: 'CMU Serif', Georgia, serif;
+}
+
+.publication-authors {
+  font-family: 'CMU Serif', Georgia, serif;
+  font-weight: 400;
+}
+
+.publication-authors a {
+  color: #226999 !important;
+  font-weight: 400;
+}
+
+.publication-authors a:hover {
+  text-decoration: underline;
+}
+
+.author-block {
+  display: inline-block;
+}
+
+/* Reduce gap between hero and video */
+.hero .hero-body {
+  padding-bottom: 0.5rem;
+}
+
+/* YouTube embed wrapper (16:9) */
+.publication-video {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  border-radius: 10px !important;
+}
+
+.publication-video iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Abstract box */
+.abstract-box {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  padding: 2rem 2.5rem;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* Buttons */
+.external-link.button {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.88rem;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  border-radius: 8px;
+  padding: 0.55em 1.2em;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.external-link.button.is-dark {
+  background-color: #f8f8f8;
+  border: none;
+  color: #8c8e90;
+}
+
+.external-link.button.is-dark:hover {
+  background-color: #eeeeee;
+  border: none;
+  color: #8c8e90;
+}
+
+/* Section headings */
+.title {
+  font-family: 'CMU Serif', Georgia, serif;
+  letter-spacing: 0;
+}
+
+.title.is-1 {
+  line-height: 1.1;
+}
+
+/* Citation box */
+#BibTeX pre {
+  background-color: #f8f8f8;
+  border-radius: 8px;
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82rem;
+  color: #8c8e90;
+  padding: 1.5rem 2rem;
+}
+
+/* Body text */
+.content p, .subtitle {
+  font-family: 'CMU Serif', Georgia, serif;
+  line-height: 1.7;
+}
+
+/* Result figure cards */
+.figure-card {
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.figure-card img {
+  width: 100%;
+  display: block;
+  border-radius: 10px;
+}
+
+.figure-caption {
+  font-family: 'CMU Serif', Georgia, serif;
+  font-size: 0.92rem;
+  color: #555;
+  margin-top: 0.6rem;
+  text-align: justify;
+}
+
+/* Theorem boxes */
+.theorem-box {
+  background-color: #f4f8fc;
+  border-left: 3px solid #226999;
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+}
+
+.theorem-box .theorem-title {
+  font-weight: 700;
+  color: #226999;
+  margin-bottom: 0.3rem;
+}

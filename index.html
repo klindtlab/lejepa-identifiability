@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Identifiability of LeJEPA world models: a representation that linearly recovers the true latent variables of the world.">
+  <meta name="keywords" content="LeJEPA, JEPA, identifiability, world model, SIGReg, Gaussian, Hermite">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>When Does LeJEPA Learn a World Model?</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/computer-modern/cmu-serif.css">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        macros: {
+          R: "\\mathbb{R}",
+          E: "\\mathbb{E}",
+          N: "\\mathcal{N}",
+          L: "\\mathcal{L}",
+          He: "\\mathrm{He}",
+          SIG: "\\mathrm{SIG}"
+        }
+      }
+    };
+  </script>
+</head>
+<body>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-2 publication-title">When Does <strong>LeJEPA</strong> Learn a World Model?</h1>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=EpT-nUAAAAAJ&hl=en">David Klindt</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://yann.lecun.com/">Yann LeCun</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://randallbalestriero.github.io/">Randall Balestriero</a><sup>3</sup>
+            </span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup>Cold Spring Harbor Laboratory</span>
+            <span class="author-block"><sup>2</sup>New York University</span>
+            <span class="author-block"><sup>3</sup>Brown University</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/TODO"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://github.com/klindtlab/lejepa-identifiability"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://colab.research.google.com/drive/1ozjRk3FfUIDX7WBqlOKvhNcIamy0JxCH?usp=sharing"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-laptop-code"></i></span>
+                  <span>Colab</span>
+                </a>
+              </span>
+              <span class="link-block">
+                <a href="https://youtu.be/EioGDo67ZDs"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-youtube"></i></span>
+                  <span>Video</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" style="padding-top: 0.5rem;">
+  <div class="container is-max-desktop">
+
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <div class="publication-video">
+          <iframe src="https://www.youtube.com/embed/EioGDo67ZDs?rel=0"
+                  title="When Does LeJEPA Learn a World Model? — video summary"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns is-centered has-text-centered" style="margin-top: 2rem;">
+      <div class="column is-four-fifths">
+        <div class="abstract-box">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              A representation that scrambles the true degrees of freedom of the world cannot support reliable planning or compositional generalization. We prove that LeJEPA (alignment plus Gaussian regularization) linearly recovers the world's latent variables from nonlinear observations &mdash; a property known as <em>linear identifiability</em> &mdash; in a broad class of worlds where latents evolve under stationary, additive-noise transitions. Our main result is that among all such worlds, the Gaussian is the <em>unique</em> latent distribution for which this guarantee holds. The forward direction rests on a spectral decomposition in which each degree of nonlinearity is strictly penalized by alignment, making the linear map the optimum; the converse rules out every non-Gaussian alternative. We further prove an <em>approximate identifiability</em> result where the guarantee degrades gracefully, and show that linear, orthogonal identifiability enables <em>optimal latent-space planning</em>. We validate the theory across 2D examples to 1024-dimensional latents, distributional ablations, and pixel-based robotic control. All theorems are formally verified in Lean 4.
+            </p>
+          </div>
+        </div>
+        <p style="color: #aaa; font-size: 0.88rem; margin-top: 2.5rem; text-align: justify;">
+          <strong style="color: #000;">TL;DR:</strong>
+          LeJEPA linearly recovers the world's latent variables &mdash; up to rotation &mdash; if and only if those latents are Gaussian. The forward direction is a spectral argument on Hermite polynomials; the converse rules out every non-Gaussian alternative. All proofs are checked in Lean 4.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">The Setup</h2>
+        <div class="figure-card">
+          <img src="./static/images/fig_lejepa_demo.jpg" alt="LeJEPA learns the World Model — three-panel illustration">
+          <p class="figure-caption">
+            <strong>(left)</strong> The world has independent Gaussian <em>latent variables</em>.
+            <strong>(center)</strong> An unknown nonlinear process scrambles them into the <em>data</em> we observe.
+            <strong>(right)</strong> LeJEPA recovers the latent variables up to rotation. We prove this is the <em>unique</em> optimum.
+          </p>
+        </div>
+
+        <div class="content has-text-justified">
+          <p>
+            <strong>The world.</strong> Latent variables $z \in \R^n$ with independent components and a stationary, additive-noise transition $z' = m(z) + \eta$. The world is observed through an unknown nonlinear mixing $x = g(z)$.
+          </p>
+          <p>
+            <strong>The learner.</strong> LeJEPA trains an encoder $h$ to minimize alignment between positive pairs $(z, z')$ subject to a Gaussianity constraint on its embedding distribution:
+          </p>
+          <p style="text-align: center;">
+            $$\min_h\ \E\!\left[\,\|h(z') - h(z)\|^2\,\right] \quad \text{s.t.} \quad h(z) \sim \N(0, I_n).$$
+          </p>
+          <p>
+            The Gaussianity constraint is enforced in practice by the Sketched Isotropic Gaussian Regularizer (SIGReg).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">Theoretical Results</h2>
+
+        <div class="theorem-box">
+          <div class="theorem-title">Theorem 1 &mdash; Forward Direction (Linear Identifiability)</div>
+          For a Gaussian world, any $h$ that satisfies the Gaussianity constraint and minimizes alignment must be a rotation: $h(z) = Qz$ for some orthogonal $Q \in O(n)$. The proof rests on the Hermite-polynomial decomposition of $h$ under the Gaussian measure: every nonlinear component contributes strictly less to the temporal correlation than a linear one, so the optimum is linear.
+        </div>
+
+        <div class="theorem-box">
+          <div class="theorem-title">Theorem 2 &mdash; Converse (Gaussian Uniqueness)</div>
+          Within the class of stationary, additive-noise worlds, the Gaussian is the <em>unique</em> latent distribution under which LeJEPA achieves linear identifiability. Any non-Gaussian alternative breaks the recipe.
+        </div>
+
+        <div class="theorem-box">
+          <div class="theorem-title">Theorem 3 &mdash; Approximate Identifiability</div>
+          When the alignment and Gaussianity objectives are only $\varepsilon$- and $\delta$-close to satisfied, linear identifiability degrades continuously: the deviation from rotation is bounded by an explicit function of $(\varepsilon, \delta)$.
+        </div>
+
+        <div class="theorem-box">
+          <div class="theorem-title">Theorem 4 &mdash; Optimal Latent-Space Planning</div>
+          Linear, orthogonal identifiability suffices for optimal planning: any orthogonally-invariant cost on the true latent variables transfers without modification to the learned representation.
+        </div>
+
+        <div class="content has-text-justified" style="margin-top: 1.5rem;">
+          <p>
+            All four results are formally verified in <strong>Lean 4 with Mathlib</strong> (8,032 build targets, zero <code>sorry</code> obligations). Axiomatized components are standard background lemmas not yet in Mathlib (Hermite polynomial infrastructure, Mazur&ndash;Ulam, AM&ndash;GM with uniform weights).
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 has-text-centered">Empirical Validation</h2>
+
+        <div class="content has-text-justified">
+          <p>
+            <strong>2D illustrations.</strong> Across four nonlinear mixings (parabolic shear, sinusoidal shear, RealNVP coupling, and a measure-preserving spiral), LeJEPA's learned encoder inverts the mixing up to rotation, consistent with Theorem 1.
+          </p>
+        </div>
+        <div class="figure-card">
+          <img src="./static/images/fig_2d_other_mixing.png" alt="Three 2D mixings recovered up to rotation">
+          <p class="figure-caption">
+            Points colored by the polar angle and radius of the ground-truth Gaussian latents. <strong>Left of each panel:</strong> observation $x = g(z)$. <strong>Right of each panel:</strong> learned representation, isomorphic to $z$ up to rotation.
+          </p>
+        </div>
+
+        <div class="content has-text-justified" style="margin-top: 2rem;">
+          <p>
+            <strong>Scaling to high dimensions.</strong> We sweep the latent dimension $N \in \{2, 4, \ldots, 1024\}$ on a RealNVP mixing with a matched encoder, comparing three Gaussianity-enforcing regularizers: SIGReg, VICReg (second-moment), and InfoNCE (pair-based). SIGReg and VICReg maintain $R^2 > 0.999$ throughout; InfoNCE degrades at scale under fixed kernel width.
+          </p>
+        </div>
+        <div class="figure-card">
+          <img src="./static/images/fig_scaling.png" alt="Scaling and bound verification">
+          <p class="figure-caption">
+            Linear identifiability $R^2(h \to z)$ as a function of latent dimension $N$, comparing SIGReg, VICReg, and InfoNCE on a shared mixing.
+          </p>
+        </div>
+
+        <div class="content has-text-justified" style="margin-top: 2rem;">
+          <p>
+            <strong>Distributional ablation &amp; bound verification.</strong> Sweeping the latent through the generalized-normal family ($\alpha = 0$ heavy-tailed &rarr; $\alpha = 1$ Laplace &rarr; $\alpha = 2$ Gaussian &rarr; $\alpha \to \infty$ uniform), recovery peaks sharply at $\alpha = 2$, illustrating Theorem 2. Empirically the approximate bound (Theorem 3) tracks the observed deviation from rotation across all runs.
+          </p>
+        </div>
+        <div class="figure-card">
+          <img src="./static/images/fig_bound_unique_plan.png" alt="Bound verification and distributional ablation">
+          <p class="figure-caption">
+            Theorem 3 (approximate identifiability) holds across grid, scaling, gennorm, and Reacher experiments; Theorem 2 (uniqueness) is illustrated by the sharp peak at the Gaussian.
+          </p>
+        </div>
+
+        <div class="content has-text-justified" style="margin-top: 2rem;">
+          <p>
+            <strong>Pixel-based control.</strong> On the DMC Reacher, a CNN encoder trained on isotropic OU pairs recovers the two joint angles up to rotation; the same physical system under a goal-directed policy breaks identifiability because policy-induced marginals collapse onto a low-entropy region.
+          </p>
+        </div>
+        <div class="figure-card">
+          <img src="./static/images/reacher_annotated.png" alt="DMC Reacher arm with two joint angles" style="max-width: 380px; margin: 0 auto;">
+          <p class="figure-caption" style="text-align: center;">
+            DMC Reacher: latent state $z = (\theta_0, \theta_1)$ consists of two joint angles. Mixing $g$ is the MuJoCo rendering pipeline.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">Citation (BibTeX)</h2>
+    <pre><code>@article{klindt2026lejepa,
+  author    = {Klindt, David and LeCun, Yann and Balestriero, Randall},
+  title     = {When Does LeJEPA Learn a World Model?},
+  year      = {2026},
+  journal   = {arXiv preprint arXiv:TODO},
+}</code></pre>
+  </div>
+</section>
+
+
+<footer class="footer" style="padding: 2rem 0;">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-four-fifths has-text-centered" style="font-size: 0.85rem; color: #888;">
+        Page template adapted from
+        <a href="https://nerfies.github.io/" style="color: #888; text-decoration: underline;">Nerfies</a>
+        and <a href="https://le-wm.github.io/" style="color: #888; text-decoration: underline;">LeWorldModel</a>.
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+</body>
+</html>
