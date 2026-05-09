@@ -50,10 +50,10 @@
               <a href="https://scholar.google.com/citations?user=EpT-nUAAAAAJ&hl=en">David Klindt</a><sup>1</sup>,
             </span>
             <span class="author-block">
-              <a href="https://yann.lecun.com/">Yann LeCun</a><sup>2</sup>,
+              <a href="https://scholar.google.com/citations?user=WLN3QrAAAAAJ&hl=en">Yann LeCun</a><sup>2</sup>,
             </span>
             <span class="author-block">
-              <a href="https://randallbalestriero.github.io/">Randall Balestriero</a><sup>3</sup>
+              <a href="https://scholar.google.com/citations?user=S1x_xqcAAAAJ&hl=en&oi=ao">Randall Balestriero</a><sup>3</sup>
             </span>
           </div>
 
@@ -191,7 +191,7 @@
 
         <div class="theorem-box">
           <div class="theorem-title">Theorem 4 &mdash; Optimal Latent-Space Planning</div>
-          Linear, orthogonal identifiability suffices for optimal planning: any orthogonally-invariant cost on the true latent variables transfers without modification to the learned representation.
+          For any finite-horizon control problem whose costs are $O(n)$-invariant, the optimal value function and optimal action sequence in the learned latent space exactly equal those in the true latent space. Linear identifiability is therefore enough to plan optimally without ever recovering the latents themselves.
         </div>
 
         <div class="content has-text-justified" style="margin-top: 1.5rem;">
@@ -225,13 +225,13 @@
 
         <div class="content has-text-justified" style="margin-top: 2rem;">
           <p>
-            <strong>Scaling to high dimensions.</strong> We sweep the latent dimension $N \in \{2, 4, \ldots, 1024\}$ on a RealNVP mixing with a matched encoder, comparing three Gaussianity-enforcing regularizers: SIGReg, VICReg (second-moment), and InfoNCE (pair-based). SIGReg and VICReg maintain $R^2 > 0.999$ throughout; InfoNCE degrades at scale under fixed kernel width.
+            <strong>Scaling to high dimensions.</strong> We sweep the latent dimension $N \in \{2, 4, \ldots, 1024\}$ on a RealNVP mixing with a matched encoder. SIGReg maintains $R^2 > 0.999$ across the full range; the paper additionally compares VICReg (second-moment) and InfoNCE (pair-based) and finds that InfoNCE degrades at scale under fixed kernel width.
           </p>
         </div>
         <div class="figure-card">
-          <img src="./static/images/fig_scaling.png" alt="Scaling and bound verification">
+          <img src="./static/images/fig_scaling.png" alt="Scaling: linear identifiability vs latent dimension under SIGReg">
           <p class="figure-caption">
-            Linear identifiability $R^2(h \to z)$ as a function of latent dimension $N$, comparing SIGReg, VICReg, and InfoNCE on a shared mixing.
+            Linear identifiability $R^2(h \to z)$ as a function of latent dimension $N$ under SIGReg, on a RealNVP mixing with matched encoder. See the paper for the full SIGReg / VICReg / InfoNCE comparison.
           </p>
         </div>
 
@@ -241,21 +241,27 @@
           </p>
         </div>
         <div class="figure-card">
-          <img src="./static/images/fig_bound_unique_plan.png" alt="Bound verification and distributional ablation">
+          <img src="./static/images/fig_bound_unique_plan.png" alt="Bound verification, Gaussian uniqueness, and control-cost results">
           <p class="figure-caption">
-            Theorem 3 (approximate identifiability) holds across grid, scaling, gennorm, and Reacher experiments; Theorem 2 (uniqueness) is illustrated by the sharp peak at the Gaussian.
+            <strong>(a)</strong> The approximate bound (Theorem 3) holds across grid, 2D, scaling, and gennorm runs.
+            <strong>(b)</strong> Linear recovery $R^2(h \to z)$ peaks sharply at $\alpha = 2$, illustrating Theorem 2.
+            <strong>(c)</strong> Control cost is statistically indistinguishable from the oracle for the Gaussian-OU encoder, biased upward for the trajectory encoder.
+            <strong>(d)</strong> Control cost decreases monotonically with linear identifiability $R^2$, supporting Theorem 4.
           </p>
         </div>
 
         <div class="content has-text-justified" style="margin-top: 2rem;">
           <p>
-            <strong>Pixel-based control.</strong> On the DMC Reacher, a CNN encoder trained on isotropic OU pairs recovers the two joint angles up to rotation; the same physical system under a goal-directed policy breaks identifiability because policy-induced marginals collapse onto a low-entropy region.
+            <strong>Latent-space planning on pixels.</strong> On the DMC Reacher, we train CNN encoders on rendered $64{\times}64$ frames and plan in latent space by linearly interpolating between a start and goal frame, decoding each step by nearest-neighbor retrieval. The Gaussian-OU-trained encoder is identifiable, so its straight-latent plan tracks the joint-space oracle; the trajectory-trained encoder, which is not identifiable, deviates. Planning quality follows linear identifiability (Theorem 4).
           </p>
         </div>
         <div class="figure-card">
-          <img src="./static/images/reacher_annotated.png" alt="DMC Reacher arm with two joint angles" style="max-width: 380px; margin: 0 auto;">
-          <p class="figure-caption" style="text-align: center;">
-            DMC Reacher: latent state $z = (\theta_0, \theta_1)$ consists of two joint angles. Mixing $g$ is the MuJoCo rendering pipeline.
+          <img src="./static/images/planning_demo.png" alt="Latent-space planning on Reacher: oracle vs Gaussian-OU encoder vs trajectory encoder">
+          <p class="figure-caption">
+            Interpolation in each encoder's latent space between fixed <span style="color: #22aa33;">start</span> and <span style="color: #dd2222;">goal</span> frames, decoded by nearest-neighbor retrieval.
+            <strong>Top:</strong> oracle (joint-space straight line).
+            <strong>Middle:</strong> Gaussian-OU encoder &mdash; closely follows the oracle.
+            <strong>Bottom:</strong> RL-trajectory encoder &mdash; deviates because the encoder is not linearly identifiable.
           </p>
         </div>
       </div>
