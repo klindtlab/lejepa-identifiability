@@ -106,10 +106,10 @@
   <div class="container is-max-desktop">
 
     <div class="has-text-centered" style="margin-bottom: 1rem;">
-      <video autoplay muted loop playsinline
+      <video id="hero-video" autoplay muted loop playsinline preload="none"
              width="80%"
-             style="border-radius: 10px; border: 1px solid #c4c6c8; pointer-events: none;">
-        <source src="./static/videos/world_model.mp4" type="video/mp4">
+             style="border-radius: 10px; border: 1px solid #c4c6c8; pointer-events: none; aspect-ratio: 16 / 9; background: #f4f4f4;">
+        <source data-src="./static/videos/world_model.mp4" type="video/mp4">
       </video>
     </div>
 
@@ -331,6 +331,19 @@
   </div>
 </footer>
 
+
+<script>
+  window.addEventListener('load', function () {
+    var v = document.getElementById('hero-video');
+    if (!v) return;
+    var s = v.querySelector('source[data-src]');
+    if (!s) return;
+    s.src = s.dataset.src;
+    v.load();
+    var p = v.play();
+    if (p && p.catch) p.catch(function () {});
+  });
+</script>
 
 </body>
 </html>
