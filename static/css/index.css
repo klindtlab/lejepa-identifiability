@@ -162,3 +162,49 @@ body {
   color: #226999;
   margin-bottom: 0.3rem;
 }
+
+/* Results table */
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'CMU Serif', Georgia, serif;
+  font-size: 0.92rem;
+  margin: 0;
+}
+.results-table th,
+.results-table td {
+  padding: 0.35rem 0.6rem;
+  text-align: right;
+  border: none;
+}
+.results-table thead tr.head-top th {
+  border-bottom: 1px solid #ccc;
+  font-weight: 600;
+  text-align: center;
+}
+.results-table thead tr.head-mid th {
+  font-weight: 600;
+  text-align: center;
+  padding-top: 0.2rem;
+  padding-bottom: 0;
+}
+.results-table thead tr.head-units th {
+  font-weight: 400;
+  font-size: 0.78rem;
+  color: #777;
+  text-align: center;
+  padding-top: 0;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid #888;
+}
+.results-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+.results-table td.col-n {
+  text-align: right;
+  font-weight: 600;
+}
+.results-table .std {
+  color: #888;
+  font-size: 0.78rem;
+}
