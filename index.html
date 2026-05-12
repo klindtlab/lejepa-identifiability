@@ -8,7 +8,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>When Does LeJEPA Learn a World Model?</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap"
         rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/computer-modern/cmu-serif.css">
 
@@ -16,7 +21,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
 
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <script>
     MathJax = {
@@ -213,7 +217,7 @@
 
         <div class="content has-text-justified">
           <p>
-            <strong>2D illustrations.</strong> Across four nonlinear mixings (parabolic shear, sinusoidal shear, RealNVP coupling, and a measure-preserving spiral), LeJEPA's learned encoder inverts the mixing up to rotation, consistent with Theorem 1.
+            <strong>2D illustrations.</strong> The teaser above already showed one mixing (a measure-preserving spiral). Below we test three more &mdash; parabolic shear, sinusoidal shear, and RealNVP coupling. In each case LeJEPA's learned encoder inverts the mixing up to rotation, consistent with Theorem 1.
           </p>
         </div>
         <div class="figure-card">
@@ -281,7 +285,7 @@
           <p class="figure-caption">
             <strong>(a)</strong> The approximate bound (Theorem 3) holds across grid, 2D, scaling, and gennorm runs.
             <strong>(b)</strong> Linear recovery $R^2(h \to z)$ peaks sharply at $\alpha = 2$, illustrating Theorem 2.
-            <strong>(c)</strong> Control cost is statistically indistinguishable from the oracle for the Gaussian-OU encoder, biased upward for the trajectory encoder.
+            <strong>(c)</strong> Control cost (path length, ideal $=1$) over $K = 30$ random start–goal pairs: the Gaussian-OU encoder is statistically indistinguishable from the oracle, the trajectory encoder is biased upward.
             <strong>(d)</strong> Control cost decreases monotonically with linear identifiability $R^2$, supporting Theorem 4.
           </p>
         </div>
