@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://youtu.be/EioGDo67ZDs">
-    <img src="https://img.youtube.com/vi/EioGDo67ZDs/maxresdefault.jpg" width="80%" alt="Video summary">
+    <img src="https://img.youtube.com/vi/EioGDo67ZDs/maxresdefault.jpg?v=2" width="80%" alt="Video summary">
   </a>
 </p>
 
