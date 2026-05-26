@@ -9,11 +9,7 @@
    <b>[ <a href="https://arxiv.org/abs/TODO">Paper</a> | <a href="https://klindtlab.github.io/lejepa-identifiability/">Website</a> | <a href="https://colab.research.google.com/drive/1ozjRk3FfUIDX7WBqlOKvhNcIamy0JxCH?usp=sharing">Colab</a> | <a href="https://youtu.be/EioGDo67ZDs">Video</a> ]</b>
 </p>
 
-<p align="center">
-  <a href="https://youtu.be/EioGDo67ZDs">
-    <img src="https://img.youtube.com/vi/EioGDo67ZDs/maxresdefault.jpg" width="80%" alt="Video summary">
-  </a>
-</p>
+<img width="600" height="338" alt="world_model" src="https://github.com/user-attachments/assets/580f4e9b-cf2e-4b31-88e4-257fa16ea40c" />
 
 If you find this work useful, please cite:
 
