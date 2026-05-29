@@ -13,14 +13,15 @@ import Mathlib.Topology.Algebra.InfiniteSum.Ring
   | Component                        | Status      |
   |----------------------------------|-------------|
   | Hermite basis & completeness     | axiomatized |
-  | Contraction lemma (ρᵈ decay)     | axiomatized |
-  | Mehler's formula                 | axiomatized |
+  | Mehler bridge (corr = Σ w_d ρᵈ)  | axiomatized |
+  | Spectral series summability      | VERIFIED    |
   | ρᵈ ≤ ρ for d ≥ 1                | VERIFIED    |
   | ρᵈ < ρ for d ≥ 2                | VERIFIED    |
   | Pointwise term bound w_d·ρᵈ≤w_d·ρ| VERIFIED    |
   | Correlation bound ≤ ρ            | VERIFIED    |
   | Equality ⟺ w₁ = 1 (linearity)  | VERIFIED    |
   | Loss lower bound 2(1-ρ)n        | VERIFIED    |
+  | Norm-preserving linear → O(n)    | VERIFIED    |
   | Theorem assembly h = Uz         | VERIFIED    |
 -/
 
@@ -51,11 +52,18 @@ structure SpectralWeights where
 -- AXIOMATIZED: HERMITE BASIS & MEHLER
 -- ═══════════════════════════════════════════════════════════════
 
-/-- **Mehler's formula** (axiomatized): the spectral correlation
-    series Σ_d w_d · ρᵈ is summable. -/
-axiom mehler_summability
+/-- **Spectral correlation series summability** (VERIFIED): the series
+    Σ_d w_d · ρᵈ is summable for 0 < ρ < 1. By the comparison test,
+    since 0 ≤ w_d·ρᵈ ≤ w_d and `Σ w_d` converges. -/
+theorem mehler_summability
     (sw : SpectralWeights) (ρ : ℝ) (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
-    Summable (fun d => sw.w d * ρ ^ d)
+    Summable (fun d => sw.w d * ρ ^ d) := by
+  refine Summable.of_nonneg_of_le (fun d => ?_) (fun d => ?_) sw.summable
+  · exact mul_nonneg (sw.nonneg d) (pow_nonneg hρ0.le d)
+  · calc sw.w d * ρ ^ d
+        ≤ sw.w d * 1 :=
+          mul_le_mul_of_nonneg_left (pow_le_one₀ hρ0.le hρ1.le) (sw.nonneg d)
+      _ = sw.w d := mul_one _
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -189,9 +197,13 @@ axiom linear_of_degree_one (enc : HermiteEncoder n)
     (hdeg : ∀ i d, 2 ≤ d → (enc.spectrum i).w d = 0) :
     ∃ (M : E n →ₗ[ℝ] E n), ∀ z, enc.toFun z = M z
 
-axiom orthogonal_of_gaussian_linear (M : E n →ₗ[ℝ] E n)
+/-- **Norm-preserving linear → orthogonal** (VERIFIED): a linear map
+    preserving norms is, by definition, a `LinearIsometry` (an element
+    of O(n)); package its data directly. -/
+theorem orthogonal_of_gaussian_linear (M : E n →ₗ[ℝ] E n)
     (hiso : ∀ v, ‖M v‖ = ‖v‖) :
-    ∃ (U : E n →ₗᵢ[ℝ] E n), ∀ z, M z = U z
+    ∃ (U : E n →ₗᵢ[ℝ] E n), ∀ z, M z = U z :=
+  ⟨⟨M, hiso⟩, fun _ => rfl⟩
 
 
 -- ═══════════════════════════════════════════════════════════════
