@@ -41,19 +41,17 @@ Comprehensive formalization of the theoretical results in the paper.
   | Loss lower bound 2(1−ρ)n             | VERIFIED    |
   | Hermite theorem assembly h = Qz      | VERIFIED    |
   | Affine eigenfunction → affine score  | VERIFIED    |
-  | Affine score → Gaussian density      | axiomatized |
+  | Affine score → Gaussian density      | VERIFIED    |
   | Gaussian → Hermite eigenfunctions    | axiomatized |
   | Gaussian uniqueness biconditional    | VERIFIED    |
-  | Polar decomposition                  | axiomatized |
-  | Cross-degree Hermite orthogonality   | axiomatized |
+  | Polar decomposition                  | hypothesis  |
   | Spectral gap → W_nl ≤ D              | VERIFIED    |
   | ‖M − Q‖²_F bound                     | VERIFIED    |
-  | Pythagorean decomposition            | axiomatized |
+  | Pythagorean decomposition            | hypothesis  |
   | Bound monotonicity                   | VERIFIED    |
   | Approximate bound assembly           | VERIFIED    |
   | Exact recovery (δ = ε = 0)           | VERIFIED    |
-  | AM-GM / Jensen                       | axiomatized |
-  | Mazur–Ulam                           | axiomatized |
+  | Mazur–Ulam                           | VERIFIED    |
   | Orthogonal Jacobian → Lipschitz      | VERIFIED    |
   | Bilipschitz → global isometry        | VERIFIED    |
   | Dirichlet theorem assembly h = Qz    | VERIFIED    |

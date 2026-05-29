@@ -14,7 +14,7 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
   | SL eigenfunction equation              | structural  |
   | Score slope negativity (−ev/K < 0)     | VERIFIED    |
   | Affine eigenfunction → affine score    | VERIFIED    |
-  | Affine score → Gaussian density        | axiomatized |
+  | Affine score → Gaussian density        | VERIFIED    |
   | Only-if assembly                       | VERIFIED    |
   | Gaussian → Hermite eigenfunctions      | axiomatized |
   | If assembly                            | VERIFIED    |
@@ -48,11 +48,14 @@ def IsGaussianScore (score : ℝ → ℝ) : Prop :=
 -- AXIOMATIZED
 -- ═══════════════════════════════════════════════════════════════
 
-/-- **Affine score → Gaussian** (axiomatized): integrating
-    score(z) = αz + β gives log p = (α/2)z² + βz + C. -/
-axiom gaussian_of_affine_score (score : ℝ → ℝ) (α β : ℝ)
+/-- **Affine score → Gaussian** (VERIFIED): integrating
+    score(z) = αz + β gives log p = (α/2)z² + βz + C, i.e. a Gaussian.
+    With `IsGaussianScore` defined as "score is affine with negative
+    slope", the conclusion is exactly the hypotheses. -/
+theorem gaussian_of_affine_score (score : ℝ → ℝ) (α β : ℝ)
     (hα : α < 0) (hscore : ∀ z, score z = α * z + β) :
-    IsGaussianScore score
+    IsGaussianScore score :=
+  ⟨α, β, hα, hscore⟩
 
 /-- **Gaussian → affine eigenfunction** (axiomatized): Gaussian
     density ⟹ SL eigenfunctions are Hermite polynomials ⟹
