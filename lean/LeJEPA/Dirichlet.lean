@@ -8,6 +8,7 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.Topology.MetricSpace.Isometry
 import Mathlib.Topology.MetricSpace.Lipschitz
+import Mathlib.Analysis.Normed.Affine.MazurUlam
 
 /-!
 # Part B — Alternative Proof via Dirichlet Energy (Appendix C)
@@ -18,13 +19,13 @@ import Mathlib.Topology.MetricSpace.Lipschitz
 
   ## Proof sketch
 
-  Steps 1–2 (reduction to Dirichlet energy and the log-determinant
-  lemma) involve measure-theoretic integration. We axiomatize their
-  conclusions.
+  The formalized theorem takes the orthogonal-Jacobian conclusion as a
+  hypothesis (`horth`) — the energy-minimization argument that would
+  derive it (Steps 1–4: reduction to Dirichlet energy, the
+  log-determinant lemma, AM-GM, and Jensen) is the measure-theoretic
+  part and is not formalized here.
 
-  Steps 3–5 are verified:
-    Step 3: AM-GM + Jensen → 𝓙(h) ≥ n                 (axiomatized)
-    Step 4: Equality forces Jₕ orthogonal everywhere   (axiomatized)
+  From the orthogonal Jacobian onward everything is verified:
     Step 5: Orthogonal Jacobian → global isometry →
             Mazur–Ulam → linear                        (VERIFIED)
 
@@ -32,9 +33,7 @@ import Mathlib.Topology.MetricSpace.Lipschitz
 
   | Component                        | Status      |
   |----------------------------------|-------------|
-  | AM-GM for singular values        | axiomatized |
-  | Jensen for log-determinant       | axiomatized |
-  | Mazur–Ulam theorem               | axiomatized |
+  | Mazur–Ulam theorem               | VERIFIED    |
   | Norm-preserving CLM → isometry   | VERIFIED    |
   | Orthogonal Jacobian → Lipschitz  | VERIFIED    |
   | Bilipschitz → global isometry    | VERIFIED    |
@@ -54,36 +53,25 @@ private abbrev E (n : ℕ) := EuclideanSpace ℝ (Fin n)
 
 
 -- ═══════════════════════════════════════════════════════════════
--- AXIOMATIZED KNOWN RESULTS
+-- MAZUR–ULAM (proved from Mathlib)
 -- ═══════════════════════════════════════════════════════════════
 
-/-!
-These are standard results available in Mathlib but requiring
-nontrivial plumbing to connect to our specific statement forms.
--/
-
-/-- **AM-GM inequality**: arithmetic mean of nonneg reals ≥ geometric
-    mean. Special case of `Real.geom_mean_le_arith_mean_weighted`
-    in `Mathlib.Analysis.MeanInequalities` with uniform weights. -/
-axiom amgm_sum_ge_prod_pow {m : ℕ} (a : Fin m → ℝ)
-    (ha : ∀ i, 0 ≤ a i) :
-    (∑ i : Fin m, a i) / m ≥ (∏ i : Fin m, a i) ^ ((1 : ℝ) / m)
-
-/-- **Jensen's inequality** applied to strictly convex exp:
-    mean of exp(cxᵢ) ≥ 1 when xᵢ sum to zero. Follows from
-    `StrictConvexOn` of `Real.exp` and the weighted AM-GM. -/
-axiom exp_mean_ge_mean_exp {m : ℕ}
-    (f : Fin m → ℝ) (hsum : ∑ i : Fin m, f i = 0) :
-    (∑ i : Fin m, Real.exp ((2 : ℝ) / m * f i)) / m ≥ 1
-
-/-- **Mazur–Ulam theorem**: every surjective isometry of a real normed
-    space is affine. Available in Mathlib as the combination of
-    `Isometry.right_inv` and affine isometry machinery in
-    `Mathlib.Analysis.Normed.Affine.Isometry`. -/
-axiom mazur_ulam
+/-- **Mazur–Ulam theorem** (VERIFIED): every surjective isometry of a
+    real normed space is affine. An isometry is injective, so together
+    with surjectivity `f` is bijective and lifts to an `IsometryEquiv`;
+    `IsometryEquiv.toRealLinearIsometryEquiv` (Mathlib's Mazur–Ulam)
+    then gives the linear part, with `f x = (f·−f 0) x + f 0`. -/
+theorem mazur_ulam
     {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
     {f : V → V} (hiso : Isometry f) (hsurj : Function.Surjective f) :
-    ∃ (A : V →ₗ[ℝ] V) (b : V), ∀ x, f x = A x + b
+    ∃ (A : V →ₗ[ℝ] V) (b : V), ∀ x, f x = A x + b := by
+  let e : V ≃ᵢ V :=
+    { toEquiv := Equiv.ofBijective f ⟨hiso.injective, hsurj⟩
+      isometry_toFun := hiso }
+  refine ⟨e.toRealLinearIsometryEquiv.toLinearEquiv.toLinearMap, f 0, fun x => ?_⟩
+  have happ : (e.toRealLinearIsometryEquiv.toLinearEquiv.toLinearMap) x
+      = f x - f 0 := e.toRealLinearIsometryEquiv_apply x
+  rw [happ]; abel
 
 
 -- ═══════════════════════════════════════════════════════════════

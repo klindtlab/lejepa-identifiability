@@ -12,15 +12,16 @@ import Mathlib.Topology.Algebra.InfiniteSum.Ring
 
   | Component                        | Status      |
   |----------------------------------|-------------|
-  | Hermite basis & completeness     | axiomatized |
-  | Contraction lemma (ρᵈ decay)     | axiomatized |
-  | Mehler's formula                 | axiomatized |
+  | Hermite basis & completeness     | hypothesis  |
+  | Mehler bridge (corr = Σ w_d ρᵈ)  | hypothesis  |
+  | Spectral series summability      | VERIFIED    |
   | ρᵈ ≤ ρ for d ≥ 1                | VERIFIED    |
   | ρᵈ < ρ for d ≥ 2                | VERIFIED    |
   | Pointwise term bound w_d·ρᵈ≤w_d·ρ| VERIFIED    |
   | Correlation bound ≤ ρ            | VERIFIED    |
   | Equality ⟺ w₁ = 1 (linearity)  | VERIFIED    |
   | Loss lower bound 2(1-ρ)n        | VERIFIED    |
+  | Norm-preserving linear → O(n)    | VERIFIED    |
   | Theorem assembly h = Uz         | VERIFIED    |
 -/
 
@@ -48,14 +49,21 @@ structure SpectralWeights where
 
 
 -- ═══════════════════════════════════════════════════════════════
--- AXIOMATIZED: HERMITE BASIS & MEHLER
+-- VERIFIED: SPECTRAL SERIES SUMMABILITY
 -- ═══════════════════════════════════════════════════════════════
 
-/-- **Mehler's formula** (axiomatized): the spectral correlation
-    series Σ_d w_d · ρᵈ is summable. -/
-axiom mehler_summability
+/-- **Spectral correlation series summability** (VERIFIED): the series
+    Σ_d w_d · ρᵈ is summable for 0 < ρ < 1. By the comparison test,
+    since 0 ≤ w_d·ρᵈ ≤ w_d and `Σ w_d` converges. -/
+theorem mehler_summability
     (sw : SpectralWeights) (ρ : ℝ) (hρ0 : 0 < ρ) (hρ1 : ρ < 1) :
-    Summable (fun d => sw.w d * ρ ^ d)
+    Summable (fun d => sw.w d * ρ ^ d) := by
+  refine Summable.of_nonneg_of_le (fun d => ?_) (fun d => ?_) sw.summable
+  · exact mul_nonneg (sw.nonneg d) (pow_nonneg hρ0.le d)
+  · calc sw.w d * ρ ^ d
+        ≤ sw.w d * 1 :=
+          mul_le_mul_of_nonneg_left (pow_le_one₀ hρ0.le hρ1.le) (sw.nonneg d)
+      _ = sw.w d := mul_one _
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -178,20 +186,16 @@ def alignmentLoss (enc : HermiteEncoder n) : ℝ :=
 
 
 -- ═══════════════════════════════════════════════════════════════
--- AXIOMATIZED: BRIDGE LEMMAS
+-- VERIFIED: NORM-PRESERVING LINEAR → O(n)
 -- ═══════════════════════════════════════════════════════════════
 
-axiom correlation_eq_spectral_sum (enc : HermiteEncoder n) (ρ : ℝ)
-    (hρ0 : 0 < ρ) (hρ1 : ρ < 1) (i : Fin n) :
-    enc.correlation i = ∑' d, (enc.spectrum i).w d * ρ ^ d
-
-axiom linear_of_degree_one (enc : HermiteEncoder n)
-    (hdeg : ∀ i d, 2 ≤ d → (enc.spectrum i).w d = 0) :
-    ∃ (M : E n →ₗ[ℝ] E n), ∀ z, enc.toFun z = M z
-
-axiom orthogonal_of_gaussian_linear (M : E n →ₗ[ℝ] E n)
+/-- **Norm-preserving linear → orthogonal** (VERIFIED): a linear map
+    preserving norms is, by definition, a `LinearIsometry` (an element
+    of O(n)); package its data directly. -/
+theorem orthogonal_of_gaussian_linear (M : E n →ₗ[ℝ] E n)
     (hiso : ∀ v, ‖M v‖ = ‖v‖) :
-    ∃ (U : E n →ₗᵢ[ℝ] E n), ∀ z, M z = U z
+    ∃ (U : E n →ₗᵢ[ℝ] E n), ∀ z, M z = U z :=
+  ⟨⟨M, hiso⟩, fun _ => rfl⟩
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -219,13 +223,16 @@ theorem loss_lower_bound (enc : HermiteEncoder n) (ρ : ℝ)
     achieves 𝓛(h) = 2(1−ρ)n must satisfy h(z) = Uz for U ∈ O(n).
 
     Verified chain:
-    1. Mehler → correlation = Σ w_d ρᵈ     (axiomatized)
+    1. Mehler → correlation = Σ w_d ρᵈ     (hypothesis: hcorr_eq)
     2. Weighted average → corr_i ≤ ρ        (VERIFIED: correlation_le_rho)
     3. Loss sum → 𝓛 ≥ 2(1−ρ)n              (VERIFIED: loss_lower_bound)
     4. 𝓛 = 2(1−ρ)n → each corr_i = ρ       (VERIFIED: Finset.sum_lt_sum)
     5. corr_i = ρ → w₁ = 1 for all i        (VERIFIED: equality_forces_degree_one)
-    6. w₁ = 1 → h linear                    (axiomatized: linear_of_degree_one)
-    7. Gaussianity + linear → U orthogonal   (axiomatized: orthogonal_of_gaussian_linear)
+    6. w₁ = 1 → h linear                    (hypothesis: hlin)
+    7. Gaussianity + linear → U orthogonal   (VERIFIED: orthogonal_of_gaussian_linear)
+
+    `hcorr_eq` and `hlin` state that the `correlation` and `spectrum` fields
+    describe `toFun` (Mehler's formula; completeness of the Hermite basis).
 -/
 theorem hermite_identifiability
     (enc : HermiteEncoder n)
@@ -233,6 +240,8 @@ theorem hermite_identifiability
     (hMehler : ∀ i, Summable (fun d => (enc.spectrum i).w d * ρ ^ d))
     (hcorr_eq : ∀ i, enc.correlation i =
       ∑' d, (enc.spectrum i).w d * ρ ^ d)
+    (hlin : (∀ i d, 2 ≤ d → (enc.spectrum i).w d = 0) →
+      ∃ (M : E n →ₗ[ℝ] E n), ∀ z, enc.toFun z = M z)
     (hopt : alignmentLoss enc = 2 * (1 - ρ) * ↑n)
     (hnorm : ∀ v, ‖enc.toFun v - enc.toFun 0‖ = ‖v - 0‖) :
     ∃ (U : E n →ₗᵢ[ℝ] E n), ∀ z, enc.toFun z = U z := by
@@ -258,7 +267,7 @@ theorem hermite_identifiability
     exact equality_forces_degree_one
       (enc.spectrum i) ρ hρ0 hρ1 (hMehler i) hci d hd
   -- Step 4: Linearity
-  obtain ⟨M, hM⟩ := linear_of_degree_one enc hdeg
+  obtain ⟨M, hM⟩ := hlin hdeg
   -- Step 5: Orthogonality
   have hnorm_M : ∀ v, ‖M v‖ = ‖v‖ := by
     intro v; have hv := hnorm v

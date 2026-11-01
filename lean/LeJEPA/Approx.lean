@@ -19,10 +19,9 @@ import Mathlib
   |------------------------------------|-------------|
   | Spectral gap positivity            | VERIFIED    |
   | W_nl ≤ D from gap inequality       | VERIFIED    |
-  | Polar decomposition ‖M−Q‖ bound    | axiomatized |
-  | Cross-degree Hermite orthogonality  | axiomatized |
+  | Polar decomposition ‖M−Q‖ bound    | hypothesis  |
   | Linear deviation ‖M−Q‖² bound      | VERIFIED    |
-  | Pythagorean decomposition           | axiomatized |
+  | Pythagorean decomposition           | hypothesis  |
   | Bound monotonicity in W_nl          | VERIFIED    |
   | Full bound assembly                 | VERIFIED    |
   | Exact recovery (δ=ε=0 ⟹ error=0)  | VERIFIED    |
@@ -62,14 +61,16 @@ theorem nonlinear_energy_le_D
 -- STEP 2: LINEAR PART DEVIATION
 -- ═══════════════════════════════════════════════════════════════
 
-/-- **Polar decomposition bound** (axiomatized): ‖M − Q‖_F ≤ ε + W_nl.
-    Combines polar decomposition, |σᵢ−1| ≤ |σᵢ²−1|, covariance
-    decomposition Cov(h) = MM^T + N, and triangle inequality. -/
-axiom polar_bound_axiom
+/-- **Polar decomposition bound** (tautological restatement): the real
+    content (‖M − Q‖_F ≤ ε + W_nl, from polar decomposition, |σᵢ−1| ≤
+    |σᵢ²−1|, the covariance split Cov(h) = MMᵀ + N, and the triangle
+    inequality) enters `approximate_identifiability` as the hypothesis
+    `hpolar`. The statement here is `P → P`, proved by `id`. -/
+theorem polar_bound_axiom
     (M_Q_norm ε W_nl : ℝ)
-    (hε : 0 ≤ ε) (hW : 0 ≤ W_nl) :
+    (_hε : 0 ≤ ε) (_hW : 0 ≤ W_nl) :
     M_Q_norm ≤ ε + W_nl →
-    M_Q_norm ≤ ε + W_nl
+    M_Q_norm ≤ ε + W_nl := id
 
 /-- **Linear deviation squared** (VERIFIED): ‖M−Q‖ ≤ ε+W_nl implies
     ‖M−Q‖² ≤ (ε+W_nl)². -/
@@ -87,13 +88,15 @@ theorem linear_deviation_sq_bound
 -- STEP 3: PYTHAGOREAN DECOMPOSITION
 -- ═══════════════════════════════════════════════════════════════
 
-/-- **Pythagorean decomposition** (axiomatized): the recovery error
-    splits into linear deviation and nonlinear energy.
-    Requires Hermite orthogonality and z ~ N(0,I). -/
-axiom pythagorean_axiom
+/-- **Pythagorean decomposition** (tautological restatement): the real
+    content (the recovery error splits into linear deviation and
+    nonlinear energy, via Hermite orthogonality and z ~ N(0,I)) enters
+    `approximate_identifiability` as the hypothesis `hpythag`. The
+    statement here is `P → P`, proved by `id`. -/
+theorem pythagorean_axiom
     (total_error M_Q_norm_sq W_nl : ℝ) :
     total_error = M_Q_norm_sq + W_nl →
-    total_error = M_Q_norm_sq + W_nl
+    total_error = M_Q_norm_sq + W_nl := id
 
 
 -- ═══════════════════════════════════════════════════════════════

@@ -69,7 +69,7 @@ lejepa-identifiability/
 
 ## Formal Verification (Lean 4)
 
-All theoretical results are formalized in Lean 4 with Mathlib. The project compiles with **zero `sorry` obligations** — every logical chain from axiomatized premises to conclusions is machine-checked. Axiomatized components are standard results not yet available in Mathlib (Hermite polynomial infrastructure, Mazur–Ulam, AM–GM with uniform weights). See the paper appendix for the full verification inventory.
+All theoretical results are formalized in Lean 4 with Mathlib. The project compiles with **zero `sorry` obligations** and no custom axioms — every logical chain from its premises to the conclusions is machine-checked. Standard results not yet available in Mathlib enter as explicit hypotheses of the theorems that use them: Mehler's formula and completeness of the Hermite basis (linear identifiability), the Sturm–Liouville spectrum at a Gaussian score (Gaussian uniqueness), the polar and Pythagorean decompositions (approximate identifiability), the orthogonal-Jacobian step of the Dirichlet proof, and trajectory pushforward (optimal latent planning). See the paper appendix for the full verification inventory.
 
 ```bash
 cd lean

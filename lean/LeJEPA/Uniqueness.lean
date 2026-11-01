@@ -14,9 +14,10 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
   | SL eigenfunction equation              | structural  |
   | Score slope negativity (−ev/K < 0)     | VERIFIED    |
   | Affine eigenfunction → affine score    | VERIFIED    |
-  | Affine score → Gaussian density        | axiomatized |
+  | Affine score → Gaussian density        | VERIFIED    |
   | Only-if assembly                       | VERIFIED    |
-  | Gaussian → Hermite eigenfunctions      | axiomatized |
+  | First eigenvalue at affine score (−Kα) | hypothesis  |
+  | Gaussian → affine eigenfunction        | VERIFIED    |
   | If assembly                            | VERIFIED    |
   | Full biconditional                     | VERIFIED    |
   | Zero-mean specialization               | VERIFIED    |
@@ -45,22 +46,41 @@ def IsGaussianScore (score : ℝ → ℝ) : Prop :=
 
 
 -- ═══════════════════════════════════════════════════════════════
--- AXIOMATIZED
+-- VERIFIED: GAUSSIAN SCORE AND ITS FIRST EIGENFUNCTION
 -- ═══════════════════════════════════════════════════════════════
 
-/-- **Affine score → Gaussian** (axiomatized): integrating
-    score(z) = αz + β gives log p = (α/2)z² + βz + C. -/
-axiom gaussian_of_affine_score (score : ℝ → ℝ) (α β : ℝ)
+/-- **Affine score → Gaussian** (VERIFIED): integrating
+    score(z) = αz + β gives log p = (α/2)z² + βz + C, i.e. a Gaussian.
+    With `IsGaussianScore` defined as "score is affine with negative
+    slope", the conclusion is exactly the hypotheses. -/
+theorem gaussian_of_affine_score (score : ℝ → ℝ) (α β : ℝ)
     (hα : α < 0) (hscore : ∀ z, score z = α * z + β) :
-    IsGaussianScore score
+    IsGaussianScore score :=
+  ⟨α, β, hα, hscore⟩
 
-/-- **Gaussian → affine eigenfunction** (axiomatized): Gaussian
-    density ⟹ SL eigenfunctions are Hermite polynomials ⟹
-    first non-constant eigenfunction is He₁(z) = z. -/
-axiom hermite_first_eigenfunction_of_gaussian
-    (lc : LatentComponent) (hgauss : IsGaussianScore lc.score) :
+/-- Whenever the score is affine, `score z = αz + β`, the eigenvalue field is
+    `ev = −Kα`: the first non-constant eigenvalue of the Sturm–Liouville
+    operator `f ↦ K (f'' + score · f')` at that score, with eigenfunction
+    `z + β/α`. -/
+def IsGaussianEigenvalue (lc : LatentComponent) : Prop :=
+  ∀ α β : ℝ, (∀ z, lc.score z = α * z + β) → lc.ev = -(lc.K * α)
+
+/-- **Gaussian → affine eigenfunction** (VERIFIED, given
+    `IsGaussianEigenvalue`): if the score is Gaussian, `score z = αz + β`
+    with `α < 0`, then `ev = −Kα`, and `a = 1`, `b = β/α` solve the
+    eigen-equation `K · score z · a = −ev · (a z + b)`: the eigenfunction is
+    `z + β/α`. -/
+theorem hermite_first_eigenfunction_of_gaussian
+    (lc : LatentComponent) (hev : IsGaussianEigenvalue lc)
+    (hgauss : IsGaussianScore lc.score) :
     ∃ (a b : ℝ), a ≠ 0 ∧
-      ∀ z, lc.K * lc.score z * a = -(lc.ev * (a * z + b))
+      ∀ z, lc.K * lc.score z * a = -(lc.ev * (a * z + b)) := by
+  obtain ⟨α, β, hα, hscore⟩ := hgauss
+  have hα0 : α ≠ 0 := hα.ne
+  have hβ : α * (β / α) = β := by field_simp
+  refine ⟨1, β / α, one_ne_zero, fun z => ?_⟩
+  rw [hscore z, hev α β hscore]
+  linear_combination (-lc.K) * hβ
 
 
 -- ═══════════════════════════════════════════════════════════════
@@ -107,8 +127,11 @@ theorem gaussian_of_affine_eigenfunction
 -- ═══════════════════════════════════════════════════════════════
 
 /-- **Gaussian uniqueness** (VERIFIED):
-    First eigenfunction is affine ⟺ p is Gaussian. -/
-theorem gaussian_uniqueness (lc : LatentComponent) :
+    First eigenfunction is affine ⟺ p is Gaussian, for a component whose
+    eigenvalue field is the operator's first non-constant eigenvalue at
+    affine scores (`IsGaussianEigenvalue`). -/
+theorem gaussian_uniqueness (lc : LatentComponent)
+    (hev : IsGaussianEigenvalue lc) :
     (IsGaussianScore lc.score →
       ∃ (a b : ℝ), a ≠ 0 ∧
         ∀ z, lc.K * lc.score z * a = -(lc.ev * (a * z + b)))
@@ -116,7 +139,7 @@ theorem gaussian_uniqueness (lc : LatentComponent) :
     (∀ (a b : ℝ), a ≠ 0 →
       (∀ z, lc.K * lc.score z * a = -(lc.ev * (a * z + b))) →
       IsGaussianScore lc.score) :=
-  ⟨hermite_first_eigenfunction_of_gaussian lc,
+  ⟨hermite_first_eigenfunction_of_gaussian lc hev,
    fun a b ha heigen => gaussian_of_affine_eigenfunction lc a b ha heigen⟩
 
 
