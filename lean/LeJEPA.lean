@@ -28,21 +28,24 @@ Comprehensive formalization of the theoretical results in the paper.
   (Corollary 4.5): under orthogonal identifiability, expected
   costs, optimal values, and optimal plans coincide between the
   learned latent and the true latent for any O(n)-invariant cost.
+  A covariant form transports the cost along the recovery map and
+  covers goal-reaching, terminal cost ‖z − z*‖².
 
 ## Verification Summary
 
   | Component                            | Status      |
   |--------------------------------------|-------------|
-  | Hermite basis & completeness         | axiomatized |
-  | Contraction lemma (ρᵈ decay)         | axiomatized |
-  | Mehler's formula                     | axiomatized |
+  | Hermite basis & completeness         | hypothesis  |
+  | Mehler bridge (corr = Σ w_d ρᵈ)      | hypothesis  |
+  | Spectral series summability          | VERIFIED    |
   | Correlation bound ≤ ρ                | VERIFIED    |
   | Equality ⟺ w₁ = 1 (linearity)       | VERIFIED    |
   | Loss lower bound 2(1−ρ)n             | VERIFIED    |
   | Hermite theorem assembly h = Qz      | VERIFIED    |
   | Affine eigenfunction → affine score  | VERIFIED    |
   | Affine score → Gaussian density      | VERIFIED    |
-  | Gaussian → Hermite eigenfunctions    | axiomatized |
+  | First eigenvalue at affine score     | hypothesis  |
+  | Gaussian → affine eigenfunction      | VERIFIED    |
   | Gaussian uniqueness biconditional    | VERIFIED    |
   | Polar decomposition                  | hypothesis  |
   | Spectral gap → W_nl ≤ D              | VERIFIED    |
@@ -55,9 +58,11 @@ Comprehensive formalization of the theoretical results in the paper.
   | Orthogonal Jacobian → Lipschitz      | VERIFIED    |
   | Bilipschitz → global isometry        | VERIFIED    |
   | Dirichlet theorem assembly h = Qz    | VERIFIED    |
-  | Trajectory pushforward (stage/term)  | axiomatized |
+  | Trajectory pushforward (stage/term)  | hypothesis  |
   | Per-step stage / terminal equiv.     | VERIFIED    |
   | Planning equivalence (main step)     | VERIFIED    |
   | Minimizer equivalence                | VERIFIED    |
   | Value equivalence                    | VERIFIED    |
+  | Covariant form (transported cost)    | VERIFIED    |
+  | Goal-reaching                        | VERIFIED    |
 -/
